@@ -19,7 +19,7 @@
      <item>
       <widget class="QLineEdit" name="lineEdit">
        <property name="placeholderText">
-        <string>1つ目のフォルダを入力または参照...</string>
+        <string>フォルダを入力または参照...</string>
        </property>
       </widget>
      </item>
@@ -43,7 +43,7 @@
      <item>
       <widget class="QLineEdit" name="lineEdit_2">
        <property name="placeholderText">
-        <string>2つ目のフォルダを入力または参照...</string>
+        <string>フォルダを入力または参照...</string>
        </property>
       </widget>
      </item>
@@ -94,6 +94,28 @@
       </widget>
      </item>
     </layout>
+   </item>
+   <item alignment="Qt::AlignHCenter">
+    <widget class="QPushButton" name="pushButton_3">
+     <property name="enabled">
+      <bool>true</bool>
+     </property>
+     <property name="maximumSize">
+      <size>
+       <width>800</width>
+       <height>16777215</height>
+      </size>
+     </property>
+     <property name="contextMenuPolicy">
+      <enum>Qt::DefaultContextMenu</enum>
+     </property>
+     <property name="layoutDirection">
+      <enum>Qt::LeftToRight</enum>
+     </property>
+     <property name="text">
+      <string>保存</string>
+     </property>
+    </widget>
    </item>
    <item>
     <spacer name="verticalSpacer">
