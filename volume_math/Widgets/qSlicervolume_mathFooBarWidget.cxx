@@ -39,7 +39,7 @@ public:
 // --------------------------------------------------------------------------
 qSlicervolume_mathFooBarWidgetPrivate
 ::qSlicervolume_mathFooBarWidgetPrivate(
-  qSlicervolume_mathFooBarWidget& object)
+ qSlicervolume_mathFooBarWidget& object)
   : q_ptr(&object)
 {
 }
@@ -68,4 +68,5 @@ qSlicervolume_mathFooBarWidget
 qSlicervolume_mathFooBarWidget
 ::~qSlicervolume_mathFooBarWidget()
 {
+
 }
