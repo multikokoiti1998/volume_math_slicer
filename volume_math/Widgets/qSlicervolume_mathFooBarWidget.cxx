@@ -77,44 +77,44 @@ qSlicervolume_mathFooBarWidget
 
 }
 
-void qSlicervolume_mathFooBarWidgetPrivate::onApplyClicked()
-{
-	Q_Q(qSlicervolume_mathFooBarWidget);
+//void qSlicervolume_mathFooBarWidgetPrivate::onApplyClicked()
+//{
+//	Q_Q(qSlicervolume_mathFooBarWidget);
+//
+//	auto* inputA = vtkMRMLScalarVolumeNode::SafeDownCast(
+//		this->inputAVolumeNodeSelector->currentNode());
+//	auto* inputB = vtkMRMLScalarVolumeNode::SafeDownCast(
+//		this->inputBVolumeNodeSelector->currentNode());
+//	auto* output = vtkMRMLScalarVolumeNode::SafeDownCast(
+//		this->outputVolumeNodeSelector->currentNode());
+//
+//	if (!inputA || !inputB || !output)
+//		return;
+//
+//	q->logic()->AddVolumes(inputA, inputB, output);
+//}
 
-	auto* inputA = vtkMRMLScalarVolumeNode::SafeDownCast(
-		this->inputAVolumeNodeSelector->currentNode());
-	auto* inputB = vtkMRMLScalarVolumeNode::SafeDownCast(
-		this->inputBVolumeNodeSelector->currentNode());
-	auto* output = vtkMRMLScalarVolumeNode::SafeDownCast(
-		this->outputVolumeNodeSelector->currentNode());
-
-	if (!inputA || !inputB || !output)
-		return;
-
-	q->logic()->AddVolumes(inputA, inputB, output);
-}
-
-void qSlicervolume_mathFooBarWidgetPrivate::setupUi(qSlicervolume_mathFooBarWidget* widget)
-{
-	this->Ui_qSlicervolume_mathFooBarWidget::setupUi(widget);
-
-	// Apply
-	QObject::connect(this->applyButton, &QPushButton::clicked,
-		[this]() { this->onApplyClicked(); });
-
-	// 入力変更（qMRMLNodeComboBox想定）
-	QObject::connect(this->inputAVolumeNodeSelector, SIGNAL(currentNodeChanged(vtkMRMLNode*)),
-		widget, SLOT(updateGUIFromMRML())); // 例：Widget側に更新関数があるなら
-	// もしくは lambda で private の関数へ
-	QObject::connect(this->inputAVolumeNodeSelector, SIGNAL(currentNodeChanged(vtkMRMLNode*)),
-		[this](vtkMRMLNode*) { this->onInputAChanged(); });
-
-	QObject::connect(this->inputBVolumeNodeSelector, SIGNAL(currentNodeChanged(vtkMRMLNode*)),
-		[this](vtkMRMLNode*) { this->onInputBChanged(); });
-
-	QObject::connect(this->outputVolumeNodeSelector, SIGNAL(currentNodeChanged(vtkMRMLNode*)),
-		[this](vtkMRMLNode*) { this->onOutputChanged(); });
-}
+//void qSlicervolume_mathFooBarWidgetPrivate::setupUi(qSlicervolume_mathFooBarWidget* widget)
+//{
+//	this->Ui_qSlicervolume_mathFooBarWidget::setupUi(widget);
+//
+//	// Apply
+//	QObject::connect(this->applyButton, &QPushButton::clicked,
+//		[this]() { this->onApplyClicked(); });
+//
+//	// 入力変更（qMRMLNodeComboBox想定）
+//	QObject::connect(this->inputAVolumeNodeSelector, SIGNAL(currentNodeChanged(vtkMRMLNode*)),
+//		widget, SLOT(updateGUIFromMRML())); // 例：Widget側に更新関数があるなら
+//	// もしくは lambda で private の関数へ
+//	QObject::connect(this->inputAVolumeNodeSelector, SIGNAL(currentNodeChanged(vtkMRMLNode*)),
+//		[this](vtkMRMLNode*) { this->onInputAChanged(); });
+//
+//	QObject::connect(this->inputBVolumeNodeSelector, SIGNAL(currentNodeChanged(vtkMRMLNode*)),
+//		[this](vtkMRMLNode*) { this->onInputBChanged(); });
+//
+//	QObject::connect(this->outputVolumeNodeSelector, SIGNAL(currentNodeChanged(vtkMRMLNode*)),
+//		[this](vtkMRMLNode*) { this->onOutputChanged(); });
+//}
 
 
 

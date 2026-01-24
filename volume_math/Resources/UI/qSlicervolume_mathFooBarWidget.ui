@@ -1,140 +1,207 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>qSlicervolume_mathFooBarWidget</class>
- <widget class="QWidget" name="qSlicervolume_mathFooBarWidget">
-  <property name="geometry">
-   <rect>
-    <x>0</x>
-    <y>0</y>
-    <width>893</width>
-    <height>669</height>
-   </rect>
-  </property>
-  <property name="windowTitle">
-   <string>Foo bar</string>
-  </property>
-  <layout class="QVBoxLayout" name="verticalLayout">
-   <item>
-    <layout class="QHBoxLayout" name="folderLayout">
-     <item>
-      <widget class="QLineEdit" name="inputAVolumeNodeSelector">
-       <property name="placeholderText">
-        <string>フォルダを入力または参照...</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QPushButton" name="pushButton">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
-       <property name="text">
-        <string>Browse...</string>
-       </property>
-      </widget>
-     </item>
-    </layout>
-   </item>
-   <item>
-    <layout class="QHBoxLayout" name="folderLayout2">
-     <item>
-      <widget class="QLineEdit" name="inputBVolumeNodeSelector">
-       <property name="placeholderText">
-        <string>フォルダを入力または参照...</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QPushButton" name="pushButton_2">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
-       <property name="text">
-        <string>Browse...</string>
-       </property>
-      </widget>
-     </item>
-    </layout>
-   </item>
-   <item>
-    <layout class="QHBoxLayout" name="folderLayout3">
-     <item>
-      <widget class="QLabel" name="label">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
-       <property name="maximumSize">
-        <size>
-         <width>100</width>
-         <height>16777215</height>
-        </size>
-       </property>
-       <property name="text">
-        <string>演算選択</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QComboBox" name="comboBox">
-       <property name="maximumSize">
-        <size>
-         <width>500</width>
-         <height>16777215</height>
-        </size>
-       </property>
-      </widget>
-     </item>
-    </layout>
-   </item>
-   <item>
-    <widget class="qMRMLNodeComboBox" name="outputVolumeNodeSelector"/>
-   </item>
-   <item alignment="Qt::AlignHCenter">
-    <widget class="QPushButton" name="applyButton">
-     <property name="enabled">
-      <bool>true</bool>
-     </property>
-     <property name="maximumSize">
-      <size>
-       <width>800</width>
-       <height>16777215</height>
-      </size>
-     </property>
-     <property name="contextMenuPolicy">
-      <enum>Qt::DefaultContextMenu</enum>
-     </property>
-     <property name="layoutDirection">
-      <enum>Qt::LeftToRight</enum>
-     </property>
-     <property name="text">
-      <string>保存</string>
-     </property>
-    </widget>
-   </item>
-   <item>
-    <spacer name="verticalSpacer">
-     <property name="orientation">
-      <enum>Qt::Vertical</enum>
-     </property>
-     <property name="sizeHint" stdset="0">
-      <size>
-       <width>20</width>
-       <height>40</height>
-      </size>
-     </property>
-    </spacer>
-   </item>
-  </layout>
- </widget>
- <resources/>
- <connections/>
+	<class>qSlicervolume_mathFooBarWidget</class>
+	<widget class="QWidget" name="qSlicervolume_mathFooBarWidget">
+		<property name="geometry">
+			<rect>
+				<x>0</x>
+				<y>0</y>
+				<width>893</width>
+				<height>669</height>
+			</rect>
+		</property>
+		<property name="windowTitle">
+			<string>Foo bar</string>
+		</property>
+
+		<layout class="QVBoxLayout" name="verticalLayout">
+
+			<!-- Input A -->
+			<item>
+				<layout class="QHBoxLayout" name="inputALayout">
+					<item>
+						<widget class="QLabel" name="labelInputA">
+							<property name="text">
+								<string>入力A</string>
+							</property>
+							<property name="maximumSize">
+								<size>
+									<width>100</width>
+									<height>16777215</height>
+								</size>
+							</property>
+						</widget>
+					</item>
+					<item>
+						<widget class="qMRMLNodeComboBox" name="inputAVolumeNodeSelector">
+							<property name="nodeTypes">
+								<stringlist>
+									<string>vtkMRMLScalarVolumeNode</string>
+								</stringlist>
+							</property>
+							<property name="addEnabled">
+								<bool>false</bool>
+							</property>
+							<property name="removeEnabled">
+								<bool>false</bool>
+							</property>
+							<property name="noneEnabled">
+								<bool>false</bool>
+							</property>
+						</widget>
+					</item>
+				</layout>
+			</item>
+
+			<!-- Input B -->
+			<item>
+				<layout class="QHBoxLayout" name="inputBLayout">
+					<item>
+						<widget class="QLabel" name="labelInputB">
+							<property name="text">
+								<string>入力B</string>
+							</property>
+							<property name="maximumSize">
+								<size>
+									<width>100</width>
+									<height>16777215</height>
+								</size>
+							</property>
+						</widget>
+					</item>
+					<item>
+						<widget class="qMRMLNodeComboBox" name="inputBVolumeNodeSelector">
+							<property name="nodeTypes">
+								<stringlist>
+									<string>vtkMRMLScalarVolumeNode</string>
+								</stringlist>
+							</property>
+							<property name="addEnabled">
+								<bool>false</bool>
+							</property>
+							<property name="removeEnabled">
+								<bool>false</bool>
+							</property>
+							<property name="noneEnabled">
+								<bool>false</bool>
+							</property>
+						</widget>
+					</item>
+				</layout>
+			</item>
+
+			<!-- Operation -->
+			<item>
+				<layout class="QHBoxLayout" name="operationLayout">
+					<item>
+						<widget class="QLabel" name="labelOperation">
+							<property name="text">
+								<string>演算選択</string>
+							</property>
+							<property name="maximumSize">
+								<size>
+									<width>100</width>
+									<height>16777215</height>
+								</size>
+							</property>
+						</widget>
+					</item>
+					<item>
+						<widget class="QComboBox" name="comboBox">
+							<property name="maximumSize">
+								<size>
+									<width>500</width>
+									<height>16777215</height>
+								</size>
+							</property>
+						</widget>
+					</item>
+				</layout>
+			</item>
+
+			<!-- Output -->
+			<item>
+				<layout class="QHBoxLayout" name="outputLayout">
+					<item>
+						<widget class="QLabel" name="labelOutput">
+							<property name="text">
+								<string>出力</string>
+							</property>
+							<property name="maximumSize">
+								<size>
+									<width>100</width>
+									<height>16777215</height>
+								</size>
+							</property>
+						</widget>
+					</item>
+					<item>
+						<widget class="qMRMLNodeComboBox" name="outputVolumeNodeSelector">
+							<property name="nodeTypes">
+								<stringlist>
+									<string>vtkMRMLScalarVolumeNode</string>
+								</stringlist>
+							</property>
+							<property name="addEnabled">
+								<bool>true</bool>
+							</property>
+							<property name="removeEnabled">
+								<bool>false</bool>
+							</property>
+							<property name="noneEnabled">
+								<bool>true</bool>
+							</property>
+							<property name="baseName">
+								<string>volume_math_Output</string>
+							</property>
+						</widget>
+					</item>
+				</layout>
+			</item>
+
+			<!-- Apply -->
+			<item alignment="Qt::AlignHCenter">
+				<widget class="QPushButton" name="applyButton">
+					<property name="enabled">
+						<bool>true</bool>
+					</property>
+					<property name="maximumSize">
+						<size>
+							<width>800</width>
+							<height>16777215</height>
+						</size>
+					</property>
+					<property name="text">
+						<string>保存</string>
+					</property>
+				</widget>
+			</item>
+
+			<item>
+				<spacer name="verticalSpacer">
+					<property name="orientation">
+						<enum>Qt::Vertical</enum>
+					</property>
+					<property name="sizeHint" stdset="0">
+						<size>
+							<width>20</width>
+							<height>40</height>
+						</size>
+					</property>
+				</spacer>
+			</item>
+
+		</layout>
+	</widget>
+
+	<customwidgets>
+		<customwidget>
+			<class>qMRMLNodeComboBox</class>
+			<extends>QWidget</extends>
+			<header>qMRMLNodeComboBox.h</header>
+		</customwidget>
+	</customwidgets>
+
+	<resources/>
+	<connections/>
 </ui>
