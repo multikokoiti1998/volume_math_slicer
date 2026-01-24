@@ -45,29 +45,29 @@ vtkSlicervolume_mathLogic::~vtkSlicervolume_mathLogic()
 //----------------------------------------------------------------------------
 void vtkSlicervolume_mathLogic::PrintSelf(ostream& os, vtkIndent indent)
 {
-  this->Superclass::PrintSelf(os, indent);
+	this->Superclass::PrintSelf(os, indent);
 }
 
 //---------------------------------------------------------------------------
-void vtkSlicervolume_mathLogic::SetMRMLSceneInternal(vtkMRMLScene * newScene)
+void vtkSlicervolume_mathLogic::SetMRMLSceneInternal(vtkMRMLScene* newScene)
 {
-  vtkNew<vtkIntArray> events;
-  events->InsertNextValue(vtkMRMLScene::NodeAddedEvent);
-  events->InsertNextValue(vtkMRMLScene::NodeRemovedEvent);
-  events->InsertNextValue(vtkMRMLScene::EndBatchProcessEvent);
-  this->SetAndObserveMRMLSceneEventsInternal(newScene, events.GetPointer());
+	vtkNew<vtkIntArray> events;
+	events->InsertNextValue(vtkMRMLScene::NodeAddedEvent);
+	events->InsertNextValue(vtkMRMLScene::NodeRemovedEvent);
+	events->InsertNextValue(vtkMRMLScene::EndBatchProcessEvent);
+	this->SetAndObserveMRMLSceneEventsInternal(newScene, events.GetPointer());
 }
 
 //-----------------------------------------------------------------------------
 void vtkSlicervolume_mathLogic::RegisterNodes()
 {
-  assert(this->GetMRMLScene() != 0);
+	assert(this->GetMRMLScene() != 0);
 }
 
 //---------------------------------------------------------------------------
 void vtkSlicervolume_mathLogic::UpdateFromMRMLScene()
 {
-  assert(this->GetMRMLScene() != 0);
+	assert(this->GetMRMLScene() != 0);
 }
 
 //---------------------------------------------------------------------------
@@ -80,4 +80,44 @@ void vtkSlicervolume_mathLogic
 void vtkSlicervolume_mathLogic
 ::OnMRMLSceneNodeRemoved(vtkMRMLNode* vtkNotUsed(node))
 {
+}
+
+void vtkSlicervolume_mathLogic::AddVolumes(
+	vtkMRMLScalarVolumeNode* inputA,
+	vtkMRMLScalarVolumeNode* inputB,
+	vtkMRMLScalarVolumeNode* output)
+{
+	if (!inputA || !inputB || !output)
+		return;
+
+	vtkImageData* imgA = inputA->GetImageData();
+	vtkImageData* imgB = inputB->GetImageData();
+	if (!imgA || !imgB)
+		return;
+
+	// 重要：型が違うと vtkImageMathematics が地雷を踏むので float に統一
+	vtkNew<vtkImageCast> castA;
+	castA->SetInputData(imgA);
+	castA->SetOutputScalarTypeToFloat();
+
+	vtkNew<vtkImageCast> castB;
+	castB->SetInputData(imgB);
+	castB->SetOutputScalarTypeToFloat();
+
+	vtkNew<vtkImageMathematics> math;
+	math->SetOperationToAdd();
+	math->SetInputConnection(0, castA->GetOutputPort());
+	math->SetInputConnection(1, castB->GetOutputPort());
+	math->Update();
+
+	// output に書き込む（DeepCopy推奨：VTKパイプラインの寿命問題を避ける）
+	vtkNew<vtkImageData> outImg;
+	outImg->DeepCopy(math->GetOutput());
+
+	output->SetAndObserveImageData(outImg);
+	output->CopyOrientation(inputA);
+	output->SetSpacing(inputA->GetSpacing());
+	output->SetOrigin(inputA->GetOrigin());
+
+	output->Modified();
 }

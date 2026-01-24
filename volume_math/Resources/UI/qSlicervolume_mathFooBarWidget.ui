@@ -17,7 +17,7 @@
    <item>
     <layout class="QHBoxLayout" name="folderLayout">
      <item>
-      <widget class="QLineEdit" name="lineEdit">
+      <widget class="QLineEdit" name="inputAVolumeNodeSelector">
        <property name="placeholderText">
         <string>フォルダを入力または参照...</string>
        </property>
@@ -41,7 +41,7 @@
    <item>
     <layout class="QHBoxLayout" name="folderLayout2">
      <item>
-      <widget class="QLineEdit" name="lineEdit_2">
+      <widget class="QLineEdit" name="inputBVolumeNodeSelector">
        <property name="placeholderText">
         <string>フォルダを入力または参照...</string>
        </property>
@@ -95,8 +95,11 @@
      </item>
     </layout>
    </item>
+   <item>
+    <widget class="qMRMLNodeComboBox" name="outputVolumeNodeSelector"/>
+   </item>
    <item alignment="Qt::AlignHCenter">
-    <widget class="QPushButton" name="pushButton_3">
+    <widget class="QPushButton" name="applyButton">
      <property name="enabled">
       <bool>true</bool>
      </property>

@@ -21,26 +21,32 @@
 // FooBar Widgets includes
 #include "qSlicervolume_mathFooBarWidget.h"
 #include "ui_qSlicervolume_mathFooBarWidget.h"
+#include <vtkMRMLScalarVolumeNode.h>
+#include <vtkMRMLNode.h>
 
 //-----------------------------------------------------------------------------
 class qSlicervolume_mathFooBarWidgetPrivate
-  : public Ui_qSlicervolume_mathFooBarWidget
+	: public Ui_qSlicervolume_mathFooBarWidget
 {
-  Q_DECLARE_PUBLIC(qSlicervolume_mathFooBarWidget);
+	Q_DECLARE_PUBLIC(qSlicervolume_mathFooBarWidget);
 protected:
-  qSlicervolume_mathFooBarWidget* const q_ptr;
+	qSlicervolume_mathFooBarWidget* const q_ptr;
 
 public:
-  qSlicervolume_mathFooBarWidgetPrivate(
-    qSlicervolume_mathFooBarWidget& object);
-  virtual void setupUi(qSlicervolume_mathFooBarWidget*);
+	qSlicervolume_mathFooBarWidgetPrivate(
+		qSlicervolume_mathFooBarWidget& object);
+	virtual void setupUi(qSlicervolume_mathFooBarWidget*);
+	void onApplyClicked();
+	void onInputAChanged();
+	void onInputBChanged();
+	void onOutputChanged();
 };
 
 // --------------------------------------------------------------------------
 qSlicervolume_mathFooBarWidgetPrivate
 ::qSlicervolume_mathFooBarWidgetPrivate(
- qSlicervolume_mathFooBarWidget& object)
-  : q_ptr(&object)
+	qSlicervolume_mathFooBarWidget& object)
+	: q_ptr(&object)
 {
 }
 
@@ -48,7 +54,7 @@ qSlicervolume_mathFooBarWidgetPrivate
 void qSlicervolume_mathFooBarWidgetPrivate
 ::setupUi(qSlicervolume_mathFooBarWidget* widget)
 {
-  this->Ui_qSlicervolume_mathFooBarWidget::setupUi(widget);
+	this->Ui_qSlicervolume_mathFooBarWidget::setupUi(widget);
 }
 
 //-----------------------------------------------------------------------------
@@ -57,11 +63,11 @@ void qSlicervolume_mathFooBarWidgetPrivate
 //-----------------------------------------------------------------------------
 qSlicervolume_mathFooBarWidget
 ::qSlicervolume_mathFooBarWidget(QWidget* parentWidget)
-  : Superclass( parentWidget )
-  , d_ptr( new qSlicervolume_mathFooBarWidgetPrivate(*this) )
+	: Superclass(parentWidget)
+	, d_ptr(new qSlicervolume_mathFooBarWidgetPrivate(*this))
 {
-  Q_D(qSlicervolume_mathFooBarWidget);
-  d->setupUi(this);
+	Q_D(qSlicervolume_mathFooBarWidget);
+	d->setupUi(this);
 }
 
 //-----------------------------------------------------------------------------
@@ -70,3 +76,49 @@ qSlicervolume_mathFooBarWidget
 {
 
 }
+
+void qSlicervolume_mathFooBarWidgetPrivate::onApplyClicked()
+{
+	Q_Q(qSlicervolume_mathFooBarWidget);
+
+	auto* inputA = vtkMRMLScalarVolumeNode::SafeDownCast(
+		this->inputAVolumeNodeSelector->currentNode());
+	auto* inputB = vtkMRMLScalarVolumeNode::SafeDownCast(
+		this->inputBVolumeNodeSelector->currentNode());
+	auto* output = vtkMRMLScalarVolumeNode::SafeDownCast(
+		this->outputVolumeNodeSelector->currentNode());
+
+	if (!inputA || !inputB || !output)
+		return;
+
+	q->logic()->AddVolumes(inputA, inputB, output);
+}
+
+void qSlicervolume_mathFooBarWidgetPrivate::setupUi(qSlicervolume_mathFooBarWidget* widget)
+{
+	this->Ui_qSlicervolume_mathFooBarWidget::setupUi(widget);
+
+	// Apply
+	QObject::connect(this->applyButton, &QPushButton::clicked,
+		[this]() { this->onApplyClicked(); });
+
+	// 入力変更（qMRMLNodeComboBox想定）
+	QObject::connect(this->inputAVolumeNodeSelector, SIGNAL(currentNodeChanged(vtkMRMLNode*)),
+		widget, SLOT(updateGUIFromMRML())); // 例：Widget側に更新関数があるなら
+	// もしくは lambda で private の関数へ
+	QObject::connect(this->inputAVolumeNodeSelector, SIGNAL(currentNodeChanged(vtkMRMLNode*)),
+		[this](vtkMRMLNode*) { this->onInputAChanged(); });
+
+	QObject::connect(this->inputBVolumeNodeSelector, SIGNAL(currentNodeChanged(vtkMRMLNode*)),
+		[this](vtkMRMLNode*) { this->onInputBChanged(); });
+
+	QObject::connect(this->outputVolumeNodeSelector, SIGNAL(currentNodeChanged(vtkMRMLNode*)),
+		[this](vtkMRMLNode*) { this->onOutputChanged(); });
+}
+
+
+
+
+
+
+

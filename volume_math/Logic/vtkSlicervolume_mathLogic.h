@@ -33,7 +33,12 @@
 #include <cstdlib>
 
 #include "vtkSlicervolume_mathModuleLogicExport.h"
-
+#include <vtkMRMLScalarVolumeNode.h>
+#include <vtkImageData.h>
+#include <vtkImageCast.h>
+#include <vtkImageMathematics.h>
+#include <vtkNew.h>
+#include <vtkSmartPointer.h>
 
 class VTK_SLICER_VOLUME_MATH_MODULE_LOGIC_EXPORT vtkSlicervolume_mathLogic :
   public vtkSlicerModuleLogic
@@ -43,6 +48,11 @@ public:
   static vtkSlicervolume_mathLogic *New();
   vtkTypeMacro(vtkSlicervolume_mathLogic, vtkSlicerModuleLogic);
   void PrintSelf(ostream& os, vtkIndent indent) override;
+
+  void AddVolumes(vtkMRMLScalarVolumeNode* inputA,
+      vtkMRMLScalarVolumeNode* inputB,
+      vtkMRMLScalarVolumeNode* output);
+
 
 protected:
   vtkSlicervolume_mathLogic();
