@@ -41,6 +41,9 @@ public:
 protected slots:
 
 protected:
+	void setup() override;
+
+protected:
   QScopedPointer<qSlicervolume_mathFooBarWidgetPrivate> d_ptr;
 
 private:
