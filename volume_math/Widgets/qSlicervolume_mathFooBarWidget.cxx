@@ -38,8 +38,7 @@ public:
 	qSlicervolume_mathFooBarWidgetPrivate(
 		qSlicervolume_mathFooBarWidget &object);
 	virtual void setupUi(qSlicervolume_mathFooBarWidget *);
-	void updateApplyState();
-	void onApplyClicked();
+
 };
 
 // --------------------------------------------------------------------------
@@ -71,45 +70,6 @@ qSlicervolume_mathFooBarWidget ::~qSlicervolume_mathFooBarWidget()
 {
 }
 
-void qSlicervolume_mathFooBarWidgetPrivate::onApplyClicked()
-{
-	Q_Q(qSlicervolume_mathFooBarWidget);
 
-	auto *a = vtkMRMLScalarVolumeNode::SafeDownCast(this->inputAVolumeNodeSelector->currentNode());
-	auto *b = vtkMRMLScalarVolumeNode::SafeDownCast(this->inputBVolumeNodeSelector->currentNode());
-	auto *out = vtkMRMLScalarVolumeNode::SafeDownCast(this->outputVolumeNodeSelector->currentNode());
 
-	if (!a || !b || !out)
-		return;
-	q->logic()->AddVolumes(a, b, out);
-}
 
-void qSlicervolume_mathFooBarWidgetPrivate::setupUi(qSlicervolume_mathFooBarWidget *widget)
-{
-	this->Ui_qSlicervolume_mathFooBarWidget::setupUi(widget);
-
-	QObject::connect(this->inputAVolumeNodeSelector, SIGNAL(currentNodeChanged(vtkMRMLNode *)),
-					 [this](vtkMRMLNode *)
-					 { this->updateApplyState(); });
-	QObject::connect(this->inputBVolumeNodeSelector, SIGNAL(currentNodeChanged(vtkMRMLNode *)),
-					 [this](vtkMRMLNode *)
-					 { this->updateApplyState(); });
-	QObject::connect(this->outputVolumeNodeSelector, SIGNAL(currentNodeChanged(vtkMRMLNode *)),
-					 [this](vtkMRMLNode *)
-					 { this->updateApplyState(); });
-
-	this->updateApplyState();
-}
-
-void qSlicervolume_mathFooBarWidget::setMRMLScene(vtkMRMLScene *scene)
-{
-	this->Superclass::setMRMLScene(scene);
-
-	Q_D(qSlicervolume_mathFooBarWidget);
-	if (!scene)
-		return;
-
-	d->inputAVolumeNodeSelector->setMRMLScene(scene);
-	d->inputBVolumeNodeSelector->setMRMLScene(scene);
-	d->outputVolumeNodeSelector->setMRMLScene(scene);
-}
