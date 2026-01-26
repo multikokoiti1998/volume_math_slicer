@@ -23,6 +23,7 @@
 #include "ui_qSlicervolume_mathFooBarWidget.h"
 #include <vtkMRMLScalarVolumeNode.h>
 #include <vtkMRMLNode.h>
+#include <qMRMLNodeComboBox.h>
 
 //-----------------------------------------------------------------------------
 class qSlicervolume_mathFooBarWidgetPrivate
@@ -87,7 +88,6 @@ void qSlicervolume_mathFooBarWidgetPrivate::setupUi(qSlicervolume_mathFooBarWidg
 {
 	this->Ui_qSlicervolume_mathFooBarWidget::setupUi(widget);
 
-	// 入力変更で Apply の有効/無効を更新（qMRMLNodeComboBox想定）
 	QObject::connect(this->inputAVolumeNodeSelector, SIGNAL(currentNodeChanged(vtkMRMLNode *)),
 					 [this](vtkMRMLNode *)
 					 { this->updateApplyState(); });
