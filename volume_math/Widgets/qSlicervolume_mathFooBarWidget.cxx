@@ -29,30 +29,27 @@ class qSlicervolume_mathFooBarWidgetPrivate
 	: public Ui_qSlicervolume_mathFooBarWidget
 {
 	Q_DECLARE_PUBLIC(qSlicervolume_mathFooBarWidget);
+
 protected:
-	qSlicervolume_mathFooBarWidget* const q_ptr;
+	qSlicervolume_mathFooBarWidget *const q_ptr;
 
 public:
 	qSlicervolume_mathFooBarWidgetPrivate(
-		qSlicervolume_mathFooBarWidget& object);
-	virtual void setupUi(qSlicervolume_mathFooBarWidget*);
+		qSlicervolume_mathFooBarWidget &object);
+	virtual void setupUi(qSlicervolume_mathFooBarWidget *);
+	void updateApplyState();
 	void onApplyClicked();
-	void onInputAChanged();
-	void onInputBChanged();
-	void onOutputChanged();
 };
 
 // --------------------------------------------------------------------------
-qSlicervolume_mathFooBarWidgetPrivate
-::qSlicervolume_mathFooBarWidgetPrivate(
-	qSlicervolume_mathFooBarWidget& object)
+qSlicervolume_mathFooBarWidgetPrivate ::qSlicervolume_mathFooBarWidgetPrivate(
+	qSlicervolume_mathFooBarWidget &object)
 	: q_ptr(&object)
 {
 }
 
 // --------------------------------------------------------------------------
-void qSlicervolume_mathFooBarWidgetPrivate
-::setupUi(qSlicervolume_mathFooBarWidget* widget)
+void qSlicervolume_mathFooBarWidgetPrivate ::setupUi(qSlicervolume_mathFooBarWidget *widget)
 {
 	this->Ui_qSlicervolume_mathFooBarWidget::setupUi(widget);
 }
@@ -61,64 +58,58 @@ void qSlicervolume_mathFooBarWidgetPrivate
 // qSlicervolume_mathFooBarWidget methods
 
 //-----------------------------------------------------------------------------
-qSlicervolume_mathFooBarWidget
-::qSlicervolume_mathFooBarWidget(QWidget* parentWidget)
-	: Superclass(parentWidget)
-	, d_ptr(new qSlicervolume_mathFooBarWidgetPrivate(*this))
+qSlicervolume_mathFooBarWidget ::qSlicervolume_mathFooBarWidget(QWidget *parentWidget)
+	: Superclass(parentWidget), d_ptr(new qSlicervolume_mathFooBarWidgetPrivate(*this))
 {
 	Q_D(qSlicervolume_mathFooBarWidget);
 	d->setupUi(this);
 }
 
 //-----------------------------------------------------------------------------
-qSlicervolume_mathFooBarWidget
-::~qSlicervolume_mathFooBarWidget()
+qSlicervolume_mathFooBarWidget ::~qSlicervolume_mathFooBarWidget()
 {
-
 }
 
-//void qSlicervolume_mathFooBarWidgetPrivate::onApplyClicked()
-//{
-//	Q_Q(qSlicervolume_mathFooBarWidget);
-//
-//	auto* inputA = vtkMRMLScalarVolumeNode::SafeDownCast(
-//		this->inputAVolumeNodeSelector->currentNode());
-//	auto* inputB = vtkMRMLScalarVolumeNode::SafeDownCast(
-//		this->inputBVolumeNodeSelector->currentNode());
-//	auto* output = vtkMRMLScalarVolumeNode::SafeDownCast(
-//		this->outputVolumeNodeSelector->currentNode());
-//
-//	if (!inputA || !inputB || !output)
-//		return;
-//
-//	q->logic()->AddVolumes(inputA, inputB, output);
-//}
+void qSlicervolume_mathFooBarWidgetPrivate::onApplyClicked()
+{
+	Q_Q(qSlicervolume_mathFooBarWidget);
 
-//void qSlicervolume_mathFooBarWidgetPrivate::setupUi(qSlicervolume_mathFooBarWidget* widget)
-//{
-//	this->Ui_qSlicervolume_mathFooBarWidget::setupUi(widget);
-//
-//	// Apply
-//	QObject::connect(this->applyButton, &QPushButton::clicked,
-//		[this]() { this->onApplyClicked(); });
-//
-//	// “ü—Í•ÏXiqMRMLNodeComboBox‘z’èj
-//	QObject::connect(this->inputAVolumeNodeSelector, SIGNAL(currentNodeChanged(vtkMRMLNode*)),
-//		widget, SLOT(updateGUIFromMRML())); // —áFWidget‘¤‚ÉXVŠÖ”‚ª‚ ‚é‚È‚ç
-//	// ‚à‚µ‚­‚Í lambda ‚Å private ‚ÌŠÖ”‚Ö
-//	QObject::connect(this->inputAVolumeNodeSelector, SIGNAL(currentNodeChanged(vtkMRMLNode*)),
-//		[this](vtkMRMLNode*) { this->onInputAChanged(); });
-//
-//	QObject::connect(this->inputBVolumeNodeSelector, SIGNAL(currentNodeChanged(vtkMRMLNode*)),
-//		[this](vtkMRMLNode*) { this->onInputBChanged(); });
-//
-//	QObject::connect(this->outputVolumeNodeSelector, SIGNAL(currentNodeChanged(vtkMRMLNode*)),
-//		[this](vtkMRMLNode*) { this->onOutputChanged(); });
-//}
+	auto *a = vtkMRMLScalarVolumeNode::SafeDownCast(this->inputAVolumeNodeSelector->currentNode());
+	auto *b = vtkMRMLScalarVolumeNode::SafeDownCast(this->inputBVolumeNodeSelector->currentNode());
+	auto *out = vtkMRMLScalarVolumeNode::SafeDownCast(this->outputVolumeNodeSelector->currentNode());
 
+	if (!a || !b || !out)
+		return;
+	q->logic()->AddVolumes(a, b, out);
+}
 
+void qSlicervolume_mathFooBarWidgetPrivate::setupUi(qSlicervolume_mathFooBarWidget *widget)
+{
+	this->Ui_qSlicervolume_mathFooBarWidget::setupUi(widget);
 
+	// å…¥åŠ›å¤‰æ›´ã§ Apply ã®æœ‰åŠ¹/ç„¡åŠ¹ã‚’æ›´æ–°ï¼ˆqMRMLNodeComboBoxæƒ³å®šï¼‰
+	QObject::connect(this->inputAVolumeNodeSelector, SIGNAL(currentNodeChanged(vtkMRMLNode *)),
+					 [this](vtkMRMLNode *)
+					 { this->updateApplyState(); });
+	QObject::connect(this->inputBVolumeNodeSelector, SIGNAL(currentNodeChanged(vtkMRMLNode *)),
+					 [this](vtkMRMLNode *)
+					 { this->updateApplyState(); });
+	QObject::connect(this->outputVolumeNodeSelector, SIGNAL(currentNodeChanged(vtkMRMLNode *)),
+					 [this](vtkMRMLNode *)
+					 { this->updateApplyState(); });
 
+	this->updateApplyState();
+}
 
+void qSlicervolume_mathFooBarWidget::setMRMLScene(vtkMRMLScene *scene)
+{
+	this->Superclass::setMRMLScene(scene);
 
+	Q_D(qSlicervolume_mathFooBarWidget);
+	if (!scene)
+		return;
 
+	d->inputAVolumeNodeSelector->setMRMLScene(scene);
+	d->inputBVolumeNodeSelector->setMRMLScene(scene);
+	d->outputVolumeNodeSelector->setMRMLScene(scene);
+}
