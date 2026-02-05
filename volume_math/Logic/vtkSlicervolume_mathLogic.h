@@ -41,33 +41,48 @@
 #include <vtkSmartPointer.h>
 
 class VTK_SLICER_VOLUME_MATH_MODULE_LOGIC_EXPORT vtkSlicervolume_mathLogic :
-  public vtkSlicerModuleLogic
+	public vtkSlicerModuleLogic
 {
 public:
 
-  static vtkSlicervolume_mathLogic *New();
-  vtkTypeMacro(vtkSlicervolume_mathLogic, vtkSlicerModuleLogic);
-  void PrintSelf(ostream& os, vtkIndent indent) override;
+	static vtkSlicervolume_mathLogic* New();
 
-  void AddVolumes(vtkMRMLScalarVolumeNode* inputA,
-      vtkMRMLScalarVolumeNode* inputB,
-      vtkMRMLScalarVolumeNode* output);
+	vtkTypeMacro(vtkSlicervolume_mathLogic, vtkSlicerModuleLogic);
+
+	void PrintSelf(ostream& os, vtkIndent indent) override;
+
+	bool AddVolumes(vtkMRMLScalarVolumeNode* a,vtkMRMLScalarVolumeNode* b,vtkMRMLScalarVolumeNode* out);
+
+	bool SubVolumes(vtkMRMLScalarVolumeNode* a, vtkMRMLScalarVolumeNode* b, vtkMRMLScalarVolumeNode* out);
+
+	bool MulVolumes(vtkMRMLScalarVolumeNode* a, vtkMRMLScalarVolumeNode* b, vtkMRMLScalarVolumeNode* out);
+
+	bool DivVolumes(vtkMRMLScalarVolumeNode* a, vtkMRMLScalarVolumeNode* b, vtkMRMLScalarVolumeNode* out);
+
+	bool MinVolumes(vtkMRMLScalarVolumeNode* a, vtkMRMLScalarVolumeNode* b, vtkMRMLScalarVolumeNode* out);
+
+	bool MaxVolumes(vtkMRMLScalarVolumeNode* a, vtkMRMLScalarVolumeNode* b, vtkMRMLScalarVolumeNode* out);
+
+	//2èÊ
+	bool SquareVolumes(vtkMRMLScalarVolumeNode* a, vtkMRMLScalarVolumeNode* b, vtkMRMLScalarVolumeNode* out);
+	//ïΩï˚ç™
+	bool SquareRootVolumes(vtkMRMLScalarVolumeNode* a, vtkMRMLScalarVolumeNode* b, vtkMRMLScalarVolumeNode* out);
 
 
 protected:
-  vtkSlicervolume_mathLogic();
-  ~vtkSlicervolume_mathLogic() override;
+	vtkSlicervolume_mathLogic();
+	~vtkSlicervolume_mathLogic() override;
 
-  void SetMRMLSceneInternal(vtkMRMLScene* newScene) override;
-  /// Register MRML Node classes to Scene. Gets called automatically when the MRMLScene is attached to this logic class.
-  void RegisterNodes() override;
-  void UpdateFromMRMLScene() override;
-  void OnMRMLSceneNodeAdded(vtkMRMLNode* node) override;
-  void OnMRMLSceneNodeRemoved(vtkMRMLNode* node) override;
+	void SetMRMLSceneInternal(vtkMRMLScene* newScene) override;
+	/// Register MRML Node classes to Scene. Gets called automatically when the MRMLScene is attached to this logic class.
+	void RegisterNodes() override;
+	void UpdateFromMRMLScene() override;
+	void OnMRMLSceneNodeAdded(vtkMRMLNode* node) override;
+	void OnMRMLSceneNodeRemoved(vtkMRMLNode* node) override;
 private:
 
-  vtkSlicervolume_mathLogic(const vtkSlicervolume_mathLogic&); // Not implemented
-  void operator=(const vtkSlicervolume_mathLogic&); // Not implemented
+	vtkSlicervolume_mathLogic(const vtkSlicervolume_mathLogic&); // Not implemented
+	void operator=(const vtkSlicervolume_mathLogic&); // Not implemented
 };
 
 #endif

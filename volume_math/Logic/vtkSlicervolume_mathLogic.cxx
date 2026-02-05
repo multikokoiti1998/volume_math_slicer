@@ -82,42 +82,339 @@ void vtkSlicervolume_mathLogic
 {
 }
 
-void vtkSlicervolume_mathLogic::AddVolumes(
-	vtkMRMLScalarVolumeNode* inputA,
-	vtkMRMLScalarVolumeNode* inputB,
-	vtkMRMLScalarVolumeNode* output)
+// 演算リスト
+bool vtkSlicervolume_mathLogic::AddVolumes(vtkMRMLScalarVolumeNode* a, vtkMRMLScalarVolumeNode* b, vtkMRMLScalarVolumeNode* out)
 {
-	if (!inputA || !inputB || !output)
-		return;
+	if (!a || !b || !out)
+		return false;
 
-	vtkImageData* imgA = inputA->GetImageData();
-	vtkImageData* imgB = inputB->GetImageData();
+	vtkImageData* imgA = a->GetImageData();
+	vtkImageData* imgB = b->GetImageData();
 	if (!imgA || !imgB)
-		return;
+		return false;
 
-	// 重要：型が違うと vtkImageMathematics が地雷を踏むので float に統一
-	vtkNew<vtkImageCast> castA;
-	castA->SetInputData(imgA);
-	castA->SetOutputScalarTypeToFloat();
+	int dimsA[3], dimsB[3];
+	imgA->GetDimensions(dimsA);
+	imgB->GetDimensions(dimsB);
 
-	vtkNew<vtkImageCast> castB;
-	castB->SetInputData(imgB);
-	castB->SetOutputScalarTypeToFloat();
+	if (dimsA[0] != dimsB[0] || dimsA[1] != dimsB[1] || dimsA[2] != dimsB[2])
+	{
+		vtkWarningMacro("Dimension mismatch: resampling is needed before math.");
+		return false;
+	}
 
 	vtkNew<vtkImageMathematics> math;
-	math->SetOperationToAdd();
-	math->SetInputConnection(0, castA->GetOutputPort());
-	math->SetInputConnection(1, castB->GetOutputPort());
+	math->SetInput1Data(imgA);
+	math->SetInput2Data(imgB);
+	math->SetOperationToSubtract();
 	math->Update();
 
-	// output に書き込む（DeepCopy推奨：VTKパイプラインの寿命問題を避ける）
-	vtkNew<vtkImageData> outImg;
-	outImg->DeepCopy(math->GetOutput());
+	vtkImageData* result = math->GetOutput();
+	if (!result)
+		return false;
 
-	output->SetAndObserveImageData(outImg);
-	output->CopyOrientation(inputA);
-	output->SetSpacing(inputA->GetSpacing());
-	output->SetOrigin(inputA->GetOrigin());
+	vtkNew<vtkImageData> outImage;
+	outImage->DeepCopy(result);
 
-	output->Modified();
+	out->SetAndObserveImageData(outImage);
+	out->CopyOrientation(a);
+	out->SetSpacing(a->GetSpacing());
+	out->SetOrigin(a->GetOrigin());
+	out->Modified();
+
+	return true;
+}
+
+bool vtkSlicervolume_mathLogic::SubVolumes(vtkMRMLScalarVolumeNode* a, vtkMRMLScalarVolumeNode* b, vtkMRMLScalarVolumeNode* out)
+{
+	if (!a || !b || !out)
+		return false;
+
+	vtkImageData* imgA = a->GetImageData();
+	vtkImageData* imgB = b->GetImageData();
+	if (!imgA || !imgB)
+		return false;
+
+	int dimsA[3], dimsB[3];
+	imgA->GetDimensions(dimsA);
+	imgB->GetDimensions(dimsB);
+
+	if (dimsA[0] != dimsB[0] || dimsA[1] != dimsB[1] || dimsA[2] != dimsB[2])
+	{
+		vtkWarningMacro("Dimension mismatch: resampling is needed before math.");
+		return false;
+	}
+
+	vtkNew<vtkImageMathematics> math;
+	math->SetInput1Data(imgA);
+	math->SetInput2Data(imgB);
+	math->SetOperationToMultiply();
+	math->Update();
+
+	vtkImageData* result = math->GetOutput();
+	if (!result)
+		return false;
+
+	vtkNew<vtkImageData> outImage;
+	outImage->DeepCopy(result);
+
+	out->SetAndObserveImageData(outImage);
+	out->CopyOrientation(a);
+	out->SetSpacing(a->GetSpacing());
+	out->SetOrigin(a->GetOrigin());
+	out->Modified();
+
+	return true;
+}
+
+bool vtkSlicervolume_mathLogic::MulVolumes(vtkMRMLScalarVolumeNode* a, vtkMRMLScalarVolumeNode* b, vtkMRMLScalarVolumeNode* out)
+{
+	if (!a || !b || !out)
+		return false;
+
+	vtkImageData* imgA = a->GetImageData();
+	vtkImageData* imgB = b->GetImageData();
+	if (!imgA || !imgB)
+		return false;
+
+	int dimsA[3], dimsB[3];
+	imgA->GetDimensions(dimsA);
+	imgB->GetDimensions(dimsB);
+
+	if (dimsA[0] != dimsB[0] || dimsA[1] != dimsB[1] || dimsA[2] != dimsB[2])
+	{
+		vtkWarningMacro("Dimension mismatch: resampling is needed before math.");
+		return false;
+	}
+
+	vtkNew<vtkImageMathematics> math;
+	math->SetInput1Data(imgA);
+	math->SetInput2Data(imgB);
+	math->SetOperationToDivide();
+	math->Update();
+
+	vtkImageData* result = math->GetOutput();
+	if (!result)
+		return false;
+
+	vtkNew<vtkImageData> outImage;
+	outImage->DeepCopy(result);
+
+	out->SetAndObserveImageData(outImage);
+	out->CopyOrientation(a);
+	out->SetSpacing(a->GetSpacing());
+	out->SetOrigin(a->GetOrigin());
+	out->Modified();
+
+	return true;
+}
+
+bool vtkSlicervolume_mathLogic::DivVolumes(vtkMRMLScalarVolumeNode* a, vtkMRMLScalarVolumeNode* b, vtkMRMLScalarVolumeNode* out)
+{
+	if (!a || !b || !out)
+		return false;
+
+	vtkImageData* imgA = a->GetImageData();
+	vtkImageData* imgB = b->GetImageData();
+	if (!imgA || !imgB)
+		return false;
+
+	int dimsA[3], dimsB[3];
+	imgA->GetDimensions(dimsA);
+	imgB->GetDimensions(dimsB);
+
+	if (dimsA[0] != dimsB[0] || dimsA[1] != dimsB[1] || dimsA[2] != dimsB[2])
+	{
+		vtkWarningMacro("Dimension mismatch: resampling is needed before math.");
+		return false;
+	}
+
+	vtkNew<vtkImageMathematics> math;
+	math->SetInput1Data(imgA);
+	math->SetInput2Data(imgB);
+	math->SetOperationToAdd();
+	math->Update();
+
+	vtkImageData* result = math->GetOutput();
+	if (!result)
+		return false;
+
+	vtkNew<vtkImageData> outImage;
+	outImage->DeepCopy(result);
+
+	out->SetAndObserveImageData(outImage);
+	out->CopyOrientation(a);
+	out->SetSpacing(a->GetSpacing());
+	out->SetOrigin(a->GetOrigin());
+	out->Modified();
+
+	return true;
+}
+
+bool vtkSlicervolume_mathLogic::MinVolumes(vtkMRMLScalarVolumeNode* a, vtkMRMLScalarVolumeNode* b, vtkMRMLScalarVolumeNode* out)
+{
+	if (!a || !b || !out)
+		return false;
+
+	vtkImageData* imgA = a->GetImageData();
+	vtkImageData* imgB = b->GetImageData();
+	if (!imgA || !imgB)
+		return false;
+
+	int dimsA[3], dimsB[3];
+	imgA->GetDimensions(dimsA);
+	imgB->GetDimensions(dimsB);
+
+	if (dimsA[0] != dimsB[0] || dimsA[1] != dimsB[1] || dimsA[2] != dimsB[2])
+	{
+		vtkWarningMacro("Dimension mismatch: resampling is needed before math.");
+		return false;
+	}
+
+	vtkNew<vtkImageMathematics> math;
+	math->SetInput1Data(imgA);
+	math->SetInput2Data(imgB);
+	math->SetOperationToMin();
+	math->Update();
+
+	vtkImageData* result = math->GetOutput();
+	if (!result)
+		return false;
+
+	vtkNew<vtkImageData> outImage;
+	outImage->DeepCopy(result);
+
+	out->SetAndObserveImageData(outImage);
+	out->CopyOrientation(a);
+	out->SetSpacing(a->GetSpacing());
+	out->SetOrigin(a->GetOrigin());
+	out->Modified();
+
+	return true;
+}
+
+bool vtkSlicervolume_mathLogic::MaxVolumes(vtkMRMLScalarVolumeNode* a, vtkMRMLScalarVolumeNode* b, vtkMRMLScalarVolumeNode* out)
+{
+	if (!a || !b || !out)
+		return false;
+
+	vtkImageData* imgA = a->GetImageData();
+	vtkImageData* imgB = b->GetImageData();
+	if (!imgA || !imgB)
+		return false;
+
+	int dimsA[3], dimsB[3];
+	imgA->GetDimensions(dimsA);
+	imgB->GetDimensions(dimsB);
+
+	if (dimsA[0] != dimsB[0] || dimsA[1] != dimsB[1] || dimsA[2] != dimsB[2])
+	{
+		vtkWarningMacro("Dimension mismatch: resampling is needed before math.");
+		return false;
+	}
+
+	vtkNew<vtkImageMathematics> math;
+	math->SetInput1Data(imgA);
+	math->SetInput2Data(imgB);
+	math->SetOperationToMax();
+	math->Update();
+
+	vtkImageData* result = math->GetOutput();
+	if (!result)
+		return false;
+
+	vtkNew<vtkImageData> outImage;
+	outImage->DeepCopy(result);
+
+	out->SetAndObserveImageData(outImage);
+	out->CopyOrientation(a);
+	out->SetSpacing(a->GetSpacing());
+	out->SetOrigin(a->GetOrigin());
+	out->Modified();
+
+	return true;
+}
+
+bool vtkSlicervolume_mathLogic::SquareVolumes(vtkMRMLScalarVolumeNode* a, vtkMRMLScalarVolumeNode* b, vtkMRMLScalarVolumeNode* out)
+{
+	if (!a || !b || !out)
+		return false;
+
+	vtkImageData* imgA = a->GetImageData();
+	vtkImageData* imgB = b->GetImageData();
+	if (!imgA || !imgB)
+		return false;
+
+	int dimsA[3], dimsB[3];
+	imgA->GetDimensions(dimsA);
+	imgB->GetDimensions(dimsB);
+
+	if (dimsA[0] != dimsB[0] || dimsA[1] != dimsB[1] || dimsA[2] != dimsB[2])
+	{
+		vtkWarningMacro("Dimension mismatch: resampling is needed before math.");
+		return false;
+	}
+
+	vtkNew<vtkImageMathematics> math;
+	math->SetInput1Data(imgA);
+	math->SetInput2Data(imgB);
+	math->SetOperationToSquare();
+	math->Update();
+
+	vtkImageData* result = math->GetOutput();
+	if (!result)
+		return false;
+
+	vtkNew<vtkImageData> outImage;
+	outImage->DeepCopy(result);
+
+	out->SetAndObserveImageData(outImage);
+	out->CopyOrientation(a);
+	out->SetSpacing(a->GetSpacing());
+	out->SetOrigin(a->GetOrigin());
+	out->Modified();
+
+	return true;
+}
+
+bool vtkSlicervolume_mathLogic::SquareRootVolumes(vtkMRMLScalarVolumeNode* a, vtkMRMLScalarVolumeNode* b, vtkMRMLScalarVolumeNode* out)
+{
+	if (!a || !b || !out)
+		return false;
+
+	vtkImageData* imgA = a->GetImageData();
+	vtkImageData* imgB = b->GetImageData();
+	if (!imgA || !imgB)
+		return false;
+
+	int dimsA[3], dimsB[3];
+	imgA->GetDimensions(dimsA);
+	imgB->GetDimensions(dimsB);
+
+	if (dimsA[0] != dimsB[0] || dimsA[1] != dimsB[1] || dimsA[2] != dimsB[2])
+	{
+		vtkWarningMacro("Dimension mismatch: resampling is needed before math.");
+		return false;
+	}
+
+	vtkNew<vtkImageMathematics> math;
+	math->SetInput1Data(imgA);
+	math->SetInput2Data(imgB);
+	math->SetOperationToSquareRoot();
+	math->Update();
+
+	vtkImageData* result = math->GetOutput();
+	if (!result)
+		return false;
+
+	vtkNew<vtkImageData> outImage;
+	outImage->DeepCopy(result);
+
+	out->SetAndObserveImageData(outImage);
+	out->CopyOrientation(a);
+	out->SetSpacing(a->GetSpacing());
+	out->SetOrigin(a->GetOrigin());
+	out->Modified();
+
+	return true;
 }

@@ -27,27 +27,31 @@ class qSlicervolume_mathModuleWidgetPrivate;
 class vtkMRMLNode;
 
 class Q_SLICER_QTMODULES_VOLUME_MATH_EXPORT qSlicervolume_mathModuleWidget :
-  public qSlicerAbstractModuleWidget
+	public qSlicerAbstractModuleWidget
 {
-  Q_OBJECT
-
+	Q_OBJECT
+		Q_DECLARE_PRIVATE(qSlicervolume_mathModuleWidget)
 public:
-
-  typedef qSlicerAbstractModuleWidget Superclass;
-  qSlicervolume_mathModuleWidget(QWidget *parent=0);
-  virtual ~qSlicervolume_mathModuleWidget();
+	typedef qSlicerAbstractModuleWidget Superclass;
+	qSlicervolume_mathModuleWidget(QWidget* parent = 0);
+	virtual ~qSlicervolume_mathModuleWidget();
 
 public slots:
-
+	void onInputChanged();
+	void onApply();
 
 protected:
-  QScopedPointer<qSlicervolume_mathModuleWidgetPrivate> d_ptr;
-
-  void setup() override;
+	QScopedPointer<qSlicervolume_mathModuleWidgetPrivate> d_ptr;
+	
+	void setup() override;
+	void setMRMLScene(vtkMRMLScene* scene) override;
 
 private:
-  Q_DECLARE_PRIVATE(qSlicervolume_mathModuleWidget);
-  Q_DISABLE_COPY(qSlicervolume_mathModuleWidget);
+	Q_DISABLE_COPY(qSlicervolume_mathModuleWidget);
 };
 
 #endif
+
+
+
+
