@@ -25,6 +25,8 @@
 #include <vtkIntArray.h>
 #include <vtkNew.h>
 #include <vtkObjectFactory.h>
+#include <vtkImageThreshold.h>
+
 
 // STD includes
 #include <cassert>
@@ -106,7 +108,7 @@ bool vtkSlicervolume_mathLogic::AddVolumes(vtkMRMLScalarVolumeNode* a, vtkMRMLSc
 	vtkNew<vtkImageMathematics> math;
 	math->SetInput1Data(imgA);
 	math->SetInput2Data(imgB);
-	math->SetOperationToSubtract();
+	math->SetOperationToAdd();
 	math->Update();
 
 	vtkImageData* result = math->GetOutput();
@@ -148,7 +150,7 @@ bool vtkSlicervolume_mathLogic::SubVolumes(vtkMRMLScalarVolumeNode* a, vtkMRMLSc
 	vtkNew<vtkImageMathematics> math;
 	math->SetInput1Data(imgA);
 	math->SetInput2Data(imgB);
-	math->SetOperationToMultiply();
+	math->SetOperationToSubtract();
 	math->Update();
 
 	vtkImageData* result = math->GetOutput();
@@ -190,7 +192,7 @@ bool vtkSlicervolume_mathLogic::MulVolumes(vtkMRMLScalarVolumeNode* a, vtkMRMLSc
 	vtkNew<vtkImageMathematics> math;
 	math->SetInput1Data(imgA);
 	math->SetInput2Data(imgB);
-	math->SetOperationToDivide();
+	math->SetOperationToMultiply();
 	math->Update();
 
 	vtkImageData* result = math->GetOutput();
@@ -232,7 +234,7 @@ bool vtkSlicervolume_mathLogic::DivVolumes(vtkMRMLScalarVolumeNode* a, vtkMRMLSc
 	vtkNew<vtkImageMathematics> math;
 	math->SetInput1Data(imgA);
 	math->SetInput2Data(imgB);
-	math->SetOperationToAdd();
+	math->SetOperationToDivide();
 	math->Update();
 
 	vtkImageData* result = math->GetOutput();
@@ -335,29 +337,21 @@ bool vtkSlicervolume_mathLogic::MaxVolumes(vtkMRMLScalarVolumeNode* a, vtkMRMLSc
 	return true;
 }
 
-bool vtkSlicervolume_mathLogic::SquareVolumes(vtkMRMLScalarVolumeNode* a, vtkMRMLScalarVolumeNode* b, vtkMRMLScalarVolumeNode* out)
+bool vtkSlicervolume_mathLogic::SquareVolumes(vtkMRMLScalarVolumeNode* a, vtkMRMLScalarVolumeNode* out)
 {
-	if (!a || !b || !out)
+	if (!a || !out)
 		return false;
 
 	vtkImageData* imgA = a->GetImageData();
-	vtkImageData* imgB = b->GetImageData();
-	if (!imgA || !imgB)
+
+	if (!imgA)
 		return false;
 
 	int dimsA[3], dimsB[3];
 	imgA->GetDimensions(dimsA);
-	imgB->GetDimensions(dimsB);
-
-	if (dimsA[0] != dimsB[0] || dimsA[1] != dimsB[1] || dimsA[2] != dimsB[2])
-	{
-		vtkWarningMacro("Dimension mismatch: resampling is needed before math.");
-		return false;
-	}
 
 	vtkNew<vtkImageMathematics> math;
 	math->SetInput1Data(imgA);
-	math->SetInput2Data(imgB);
 	math->SetOperationToSquare();
 	math->Update();
 
@@ -377,29 +371,29 @@ bool vtkSlicervolume_mathLogic::SquareVolumes(vtkMRMLScalarVolumeNode* a, vtkMRM
 	return true;
 }
 
-bool vtkSlicervolume_mathLogic::SquareRootVolumes(vtkMRMLScalarVolumeNode* a, vtkMRMLScalarVolumeNode* b, vtkMRMLScalarVolumeNode* out)
+bool vtkSlicervolume_mathLogic::SquareRootVolumes(vtkMRMLScalarVolumeNode* a, vtkMRMLScalarVolumeNode* out)
 {
-	if (!a || !b || !out)
+	if (!a || !out)
 		return false;
 
 	vtkImageData* imgA = a->GetImageData();
-	vtkImageData* imgB = b->GetImageData();
-	if (!imgA || !imgB)
+
+	if (!imgA)
 		return false;
 
-	int dimsA[3], dimsB[3];
+	int dimsA[3];
 	imgA->GetDimensions(dimsA);
-	imgB->GetDimensions(dimsB);
 
-	if (dimsA[0] != dimsB[0] || dimsA[1] != dimsB[1] || dimsA[2] != dimsB[2])
-	{
-		vtkWarningMacro("Dimension mismatch: resampling is needed before math.");
-		return false;
-	}
+	//•‰‚Ì‰æ‘f’l‚ð0‚ÉƒNƒ‰ƒ“ƒv
+	vtkNew<vtkImageThreshold> clamp;
+	clamp->SetInputData(imgA);
+	clamp->ThresholdByLower(0.0);
+	clamp->SetInValue(0.0);
+	clamp->ReplaceOutOff();
+	clamp->Update();
 
 	vtkNew<vtkImageMathematics> math;
 	math->SetInput1Data(imgA);
-	math->SetInput2Data(imgB);
 	math->SetOperationToSquareRoot();
 	math->Update();
 
@@ -418,3 +412,5 @@ bool vtkSlicervolume_mathLogic::SquareRootVolumes(vtkMRMLScalarVolumeNode* a, vt
 
 	return true;
 }
+
+

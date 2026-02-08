@@ -64,9 +64,9 @@ public:
 	bool MaxVolumes(vtkMRMLScalarVolumeNode* a, vtkMRMLScalarVolumeNode* b, vtkMRMLScalarVolumeNode* out);
 
 	//2èÊ
-	bool SquareVolumes(vtkMRMLScalarVolumeNode* a, vtkMRMLScalarVolumeNode* b, vtkMRMLScalarVolumeNode* out);
+	bool SquareVolumes(vtkMRMLScalarVolumeNode* a, vtkMRMLScalarVolumeNode* out);
 	//ïΩï˚ç™
-	bool SquareRootVolumes(vtkMRMLScalarVolumeNode* a, vtkMRMLScalarVolumeNode* b, vtkMRMLScalarVolumeNode* out);
+	bool SquareRootVolumes(vtkMRMLScalarVolumeNode* a, vtkMRMLScalarVolumeNode* out);
 
 
 protected:
