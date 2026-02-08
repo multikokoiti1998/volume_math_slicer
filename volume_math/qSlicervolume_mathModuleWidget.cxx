@@ -120,7 +120,7 @@ void qSlicervolume_mathModuleWidget::setMRMLScene(vtkMRMLScene* scene)
 
 	Q_D(qSlicervolume_mathModuleWidget);
 	if (!d->inputAVolumeNodeSelector)
-		return; 
+		return;
 
 	d->inputAVolumeNodeSelector->setMRMLScene(scene);
 	d->inputBVolumeNodeSelector->setMRMLScene(scene);
@@ -156,9 +156,4 @@ void qSlicervolume_mathModuleWidget::onApply()
 		return;
 	}
 
-	bool ok = logic->AddVolumes(a, b, out);
-	if (!ok)
-	{
-		qWarning() << "AddVolumes failed";
-	}
 }

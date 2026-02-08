@@ -47,27 +47,23 @@ public:
 
 	static vtkSlicervolume_mathLogic* New();
 
+	enum VolumeOp {
+		OP_MATH_START = 100,
+		OP_ADD, OP_SUB, OP_MUL, OP_DIV, OP_MIN, OP_MAX, OP_ABS, OP_SQR, OP_SQRT,
+		OP_LOGIC_START = 200,
+		OP_AND, OP_OR, OP_XOR, OP_NOT
+	};
+
 	vtkTypeMacro(vtkSlicervolume_mathLogic, vtkSlicerModuleLogic);
 
 	void PrintSelf(ostream& os, vtkIndent indent) override;
 
-	bool AddVolumes(vtkMRMLScalarVolumeNode* a,vtkMRMLScalarVolumeNode* b,vtkMRMLScalarVolumeNode* out);
-
-	bool SubVolumes(vtkMRMLScalarVolumeNode* a, vtkMRMLScalarVolumeNode* b, vtkMRMLScalarVolumeNode* out);
-
-	bool MulVolumes(vtkMRMLScalarVolumeNode* a, vtkMRMLScalarVolumeNode* b, vtkMRMLScalarVolumeNode* out);
-
-	bool DivVolumes(vtkMRMLScalarVolumeNode* a, vtkMRMLScalarVolumeNode* b, vtkMRMLScalarVolumeNode* out);
-
-	bool MinVolumes(vtkMRMLScalarVolumeNode* a, vtkMRMLScalarVolumeNode* b, vtkMRMLScalarVolumeNode* out);
-
-	bool MaxVolumes(vtkMRMLScalarVolumeNode* a, vtkMRMLScalarVolumeNode* b, vtkMRMLScalarVolumeNode* out);
-
-	//2èÊ
-	bool SquareVolumes(vtkMRMLScalarVolumeNode* a, vtkMRMLScalarVolumeNode* out);
-	//ïΩï˚ç™
-	bool SquareRootVolumes(vtkMRMLScalarVolumeNode* a, vtkMRMLScalarVolumeNode* out);
-
+	// ã§í èàóùä÷êî
+	bool ExecuteOperation(
+		vtkMRMLScalarVolumeNode* a,
+		vtkMRMLScalarVolumeNode* out,
+		VolumeOp op,
+		vtkMRMLScalarVolumeNode* b = nullptr);
 
 protected:
 	vtkSlicervolume_mathLogic();
