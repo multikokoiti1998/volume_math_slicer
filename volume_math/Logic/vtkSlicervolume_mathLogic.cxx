@@ -90,12 +90,10 @@ bool vtkSlicervolume_mathLogic::ExecuteOperation(
 	VolumeOp op,
 	vtkMRMLScalarVolumeNode* b)
 {
-	// 1. 基本的なバリデーション
 	if (!a || !out) return false;
 	vtkImageData* imgA = a->GetImageData();
 	if (!imgA) return false;
 
-	// 2. 二項演算の場合の共通チェック
 	vtkImageData* imgB = (b) ? b->GetImageData() : nullptr;
 	if (b && !imgB) return false;
 
@@ -109,11 +107,9 @@ bool vtkSlicervolume_mathLogic::ExecuteOperation(
 		}
 	}
 
-	// 3. フィルタの選択と設定
 	vtkSmartPointer<vtkImageAlgorithm> filter;
 
 	if (op >= OP_LOGIC_START) {
-		// --- vtkImageLogic を使用するケース ---
 		vtkNew<vtkImageLogic> logic;
 		logic->SetInput1Data(imgA);
 		if (imgB) logic->SetInput2Data(imgB);
@@ -128,10 +124,8 @@ bool vtkSlicervolume_mathLogic::ExecuteOperation(
 		filter = logic;
 	}
 	else {
-		// --- vtkImageMathematics を使用するケース ---
 		vtkNew<vtkImageMathematics> math;
 
-		// 特殊処理：SquareRoot のためのクランプ
 		if (op == OP_SQRT) {
 			vtkNew<vtkImageThreshold> clamp;
 			clamp->SetInputData(imgA);
@@ -162,11 +156,9 @@ bool vtkSlicervolume_mathLogic::ExecuteOperation(
 		filter = math;
 	}
 
-	// 4. 実行と結果の反映（共通処理）
 	if (!filter) return false;
 	filter->Update();
 
-	// 出力データの作成とメタデータのコピー
 	vtkNew<vtkImageData> outImage;
 	outImage->DeepCopy(filter->GetOutputDataObject(0));
 

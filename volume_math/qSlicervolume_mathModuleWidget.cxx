@@ -1,4 +1,4 @@
-/*==============================================================================
+ï»¿/*==============================================================================
 
   Program: 3D Slicer
 
@@ -21,7 +21,8 @@
 // MRML includes
 #include <vtkMRMLScene.h>
 #include <vtkMRMLScalarVolumeNode.h>
-
+#include <QApplication>
+#include <QMessageBox>
 // Slicer includes
 #include "qSlicervolume_mathModuleWidget.h"
 #include "ui_qSlicervolume_mathModuleWidget.h"
@@ -82,16 +83,21 @@ void qSlicervolume_mathModuleWidgetPrivate::init()
 {
 	Q_Q(qSlicervolume_mathModuleWidget);
 
-	// MRML scene ‚ð NodeSelector ‚É“n‚·id—vj
-	// ¦ objectName ‚Í‚ ‚È‚½‚Ìui‚É‡‚í‚¹‚é
+	this->outputVolumeNodeSelector->setNodeTypes(
+		QStringList() << "vtkMRMLScalarVolumeNode");
+
+	this->outputVolumeNodeSelector->setNoneEnabled(false);
+	this->outputVolumeNodeSelector->setAddEnabled(true);
+	this->outputVolumeNodeSelector->setRenameEnabled(true);
+	this->outputVolumeNodeSelector->setRemoveEnabled(false);
+
+	// MRML scene ã‚’ NodeSelector ã«æ¸¡ã™
 	this->inputAVolumeNodeSelector->setMRMLScene(q->mrmlScene());
 	this->inputBVolumeNodeSelector->setMRMLScene(q->mrmlScene());
 	this->outputVolumeNodeSelector->setMRMLScene(q->mrmlScene());
 
-	// ‚Ü‚¸‚ÍApply–³Œø
 	this->applyButton->setEnabled(false);
 
-	// “ü—Í‚ª•Ï‚í‚Á‚½‚ç apply ‚Ì—LŒø/–³Œø‚ðXV
 	QObject::connect(this->inputAVolumeNodeSelector, SIGNAL(currentNodeChanged(vtkMRMLNode*)),
 		q, SLOT(onInputChanged()));
 	QObject::connect(this->inputBVolumeNodeSelector, SIGNAL(currentNodeChanged(vtkMRMLNode*)),
@@ -99,19 +105,42 @@ void qSlicervolume_mathModuleWidgetPrivate::init()
 	QObject::connect(this->outputVolumeNodeSelector, SIGNAL(currentNodeChanged(vtkMRMLNode*)),
 		q, SLOT(onInputChanged()));
 
-	// Apply
+	// æ¼”ç®—ãƒªã‚¹ãƒˆã®è¿½åŠ  
+	this->operationComboBox->addItem("Add", OP_ADD);
+	this->operationComboBox->addItem("Subtract", OP_SUB);
+	this->operationComboBox->addItem("Multiply", OP_MUL);
+	this->operationComboBox->addItem("Min", OP_MIN);
+	this->operationComboBox->addItem("Max", OP_MAX);
+	this->operationComboBox->addItem("Square", OP_SQR);
+	this->operationComboBox->addItem("Square Root", OP_SQRT);
+	this->operationComboBox->addItem("Absolute (abs)", OP_ABS);
+
+	// è«–ç†æ¼”ç®—
+	this->operationComboBox->addItem("Logical AND", OP_AND);
+	this->operationComboBox->addItem("Logical OR", OP_OR);
+	this->operationComboBox->addItem("Logical NOT", OP_NOT);
+	
 	QObject::connect(this->applyButton, SIGNAL(clicked()),
 		q, SLOT(onApply()));
 }
 
 void qSlicervolume_mathModuleWidgetPrivate::updateApplyState()
 {
-	bool ok =
-		this->inputAVolumeNodeSelector->currentNode() &&
-		this->inputBVolumeNodeSelector->currentNode() &&
-		this->outputVolumeNodeSelector->currentNode();
+	Q_Q(qSlicervolume_mathModuleWidget);
 
-	this->applyButton->setEnabled(ok);
+	int opIndex = this->operationComboBox->currentIndex();
+	VolumeOp op = static_cast<VolumeOp>(this->operationComboBox->itemData(opIndex).toInt());
+
+	bool hasA = this->inputAVolumeNodeSelector->currentNode() != nullptr;
+	bool hasB = this->inputBVolumeNodeSelector->currentNode() != nullptr;
+	bool hasOut = this->outputVolumeNodeSelector->currentNode() != nullptr;
+
+	bool isUnaryOperation = (op == OP_SQR || op == OP_SQRT || op == OP_NOT || op == OP_ABS);
+
+	bool canApply = hasA && hasOut && (isUnaryOperation || hasB);
+	this->applyButton->setEnabled(canApply);
+
+	this->inputBVolumeNodeSelector->setEnabled(!isUnaryOperation);
 }
 
 void qSlicervolume_mathModuleWidget::setMRMLScene(vtkMRMLScene* scene)
@@ -122,6 +151,12 @@ void qSlicervolume_mathModuleWidget::setMRMLScene(vtkMRMLScene* scene)
 	if (!d->inputAVolumeNodeSelector)
 		return;
 
+	d->inputAVolumeNodeSelector->setNodeTypes(
+		QStringList() << "vtkMRMLScalarVolumeNode");
+	d->inputBVolumeNodeSelector->setNodeTypes(
+		QStringList() << "vtkMRMLScalarVolumeNode");
+	d->outputVolumeNodeSelector->setNodeTypes(
+		QStringList() << "vtkMRMLScalarVolumeNode");
 	d->inputAVolumeNodeSelector->setMRMLScene(scene);
 	d->inputBVolumeNodeSelector->setMRMLScene(scene);
 	d->outputVolumeNodeSelector->setMRMLScene(scene);
@@ -142,18 +177,22 @@ void qSlicervolume_mathModuleWidget::onApply()
 	auto* a = vtkMRMLScalarVolumeNode::SafeDownCast(d->inputAVolumeNodeSelector->currentNode());
 	auto* b = vtkMRMLScalarVolumeNode::SafeDownCast(d->inputBVolumeNodeSelector->currentNode());
 	auto* out = vtkMRMLScalarVolumeNode::SafeDownCast(d->outputVolumeNodeSelector->currentNode());
-
-	if (!a || !b || !out)
-	{
-		qWarning() << "Invalid volume node(s)";
-		return;
-	}
+	int opIndex = d->operationComboBox->currentIndex();
+	VolumeOp op = static_cast<VolumeOp>(d->operationComboBox->itemData(opIndex).toInt());
 
 	auto* logic = vtkSlicervolume_mathLogic::SafeDownCast(this->logic());
-	if (!logic)
+	if (logic)
 	{
-		qWarning() << "Logic not available";
-		return;
+
+		QApplication::setOverrideCursor(Qt::WaitCursor);
+
+		bool success = logic->ExecuteOperation(a, out, op, b);
+
+		QApplication::restoreOverrideCursor();
+
+		if (!success) {
+			QMessageBox::critical(this, "Error", "Calculation failed. Please check the image dimensions");
+		}
 	}
 
 }

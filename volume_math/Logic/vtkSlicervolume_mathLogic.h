@@ -40,6 +40,13 @@
 #include <vtkNew.h>
 #include <vtkSmartPointer.h>
 
+enum VolumeOp {
+	OP_MATH_START = 100,
+	OP_ADD, OP_SUB, OP_MUL, OP_DIV, OP_MIN, OP_MAX, OP_ABS, OP_SQR, OP_SQRT,
+	OP_LOGIC_START = 200,
+	OP_AND, OP_OR, OP_XOR, OP_NOT
+};
+
 class VTK_SLICER_VOLUME_MATH_MODULE_LOGIC_EXPORT vtkSlicervolume_mathLogic :
 	public vtkSlicerModuleLogic
 {
@@ -47,12 +54,7 @@ public:
 
 	static vtkSlicervolume_mathLogic* New();
 
-	enum VolumeOp {
-		OP_MATH_START = 100,
-		OP_ADD, OP_SUB, OP_MUL, OP_DIV, OP_MIN, OP_MAX, OP_ABS, OP_SQR, OP_SQRT,
-		OP_LOGIC_START = 200,
-		OP_AND, OP_OR, OP_XOR, OP_NOT
-	};
+
 
 	vtkTypeMacro(vtkSlicervolume_mathLogic, vtkSlicerModuleLogic);
 
