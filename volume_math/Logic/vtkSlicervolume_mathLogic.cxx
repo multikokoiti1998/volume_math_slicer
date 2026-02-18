@@ -123,8 +123,14 @@ bool vtkSlicervolume_mathLogic::ExecuteOperation(
 		}
 		filter = logic;
 	}
-	else {
+	
+	else
+{
 		vtkNew<vtkImageMathematics> math;
+
+		// “ü—Í‚ð‚Ü‚¸—pˆÓ
+		vtkSmartPointer<vtkImageData> in1;
+		vtkSmartPointer<vtkImageData> in2;
 
 		if (op == OP_SQRT) {
 			vtkNew<vtkImageThreshold> clamp;
@@ -133,27 +139,98 @@ bool vtkSlicervolume_mathLogic::ExecuteOperation(
 			clamp->SetInValue(0.0);
 			clamp->ReplaceOutOff();
 			clamp->Update();
-			math->SetInput1Data(clamp->GetOutput());
+			in1 = clamp->GetOutput();
 		}
 		else {
-			math->SetInput1Data(imgA);
+			in1 = imgA;
 		}
 
-		if (imgB) math->SetInput2Data(imgB);
+		in2 = imgB;
+
+		if (op == OP_DIV) {
+			vtkNew<vtkImageCast> castA;
+			castA->SetInputData(in1);             
+			castA->SetOutputScalarTypeToFloat();
+			castA->ClampOverflowOn();
+			castA->Update();
+			in1 = castA->GetOutput();
+
+			if (in2) {
+				vtkNew<vtkImageCast> castB;
+				castB->SetInputData(in2);
+				castB->SetOutputScalarTypeToFloat();
+				castB->ClampOverflowOn();
+				castB->Update();
+				in2 = castB->GetOutput();
+			}
+		}
+
+		math->SetInput1Data(in1);
+		if (in2) math->SetInput2Data(in2);
 
 		switch (op) {
-		case OP_ADD:      math->SetOperationToAdd(); break;
-		case OP_SUB:      math->SetOperationToSubtract(); break;
-		case OP_MUL:      math->SetOperationToMultiply(); break;
-		case OP_DIV:      math->SetOperationToDivide(); break;
-		case OP_MIN:      math->SetOperationToMin(); break;
-		case OP_MAX:      math->SetOperationToMax(); break;
-		case OP_SQR:      math->SetOperationToSquare(); break;
-		case OP_SQRT:     math->SetOperationToSquareRoot(); break;
-		case OP_ABS:      math->SetOperationToAbsoluteValue(); break;
+		case OP_ADD:  math->SetOperationToAdd(); break;
+		case OP_SUB:  math->SetOperationToSubtract(); break;
+		case OP_MUL:  math->SetOperationToMultiply(); break;
+		case OP_DIV:  math->SetOperationToDivide(); break;   // ©–ß‚·
+		case OP_MIN:  math->SetOperationToMin(); break;
+		case OP_MAX:  math->SetOperationToMax(); break;
+		case OP_SQR:  math->SetOperationToSquare(); break;
+		case OP_SQRT: math->SetOperationToSquareRoot(); break;
+		case OP_ABS:  math->SetOperationToAbsoluteValue(); break;
 		default: return false;
 		}
+
 		filter = math;
+
+		//vtkNew<vtkImageMathematics> math;
+
+		//if (op == OP_SQRT) {
+		//	vtkNew<vtkImageThreshold> clamp;
+		//	clamp->SetInputData(imgA);
+		//	clamp->ThresholdByLower(0.0);
+		//	clamp->SetInValue(0.0);
+		//	clamp->ReplaceOutOff();
+		//	clamp->Update();
+		//	math->SetInput1Data(clamp->GetOutput());
+		//}
+		//else {
+		//	math->SetInput1Data(imgA);
+		//}
+
+		//if (imgB) math->SetInput2Data(imgB);
+
+		//if (op == OP_DIV) {
+		//	vtkSmartPointer<vtkImageData> in1 = imgA;
+		//	vtkSmartPointer<vtkImageData> in2 = imgB;
+		//	vtkNew<vtkImageCast> castA;
+		//	castA->SetInputData(imgA);
+		//	castA->SetOutputScalarTypeToFloat();
+		//	castA->Update();
+		//	in1 = castA->GetOutput();
+
+		//	if (imgB) {
+		//		vtkNew<vtkImageCast> castB;
+		//		castB->SetInputData(imgB);
+		//		castB->SetOutputScalarTypeToFloat();
+		//		castB->Update();
+		//		in2 = castB->GetOutput();
+		//	}
+		//}
+
+		//switch (op) {
+		//case OP_ADD:      math->SetOperationToAdd(); break;
+		//case OP_SUB:      math->SetOperationToSubtract(); break;
+		//case OP_MUL:      math->SetOperationToMultiply(); break;
+		//case OP_DIV:      math->SetOperationToDivide(); break;
+		//case OP_MIN:      math->SetOperationToMin(); break;
+		//case OP_MAX:      math->SetOperationToMax(); break;
+		//case OP_SQR:      math->SetOperationToSquare(); break;
+		//case OP_SQRT:     math->SetOperationToSquareRoot(); break;
+		//case OP_ABS:      math->SetOperationToAbsoluteValue(); break;
+		//default: return false;
+		//}
+		//filter = math;
 	}
 
 	if (!filter) return false;
@@ -161,6 +238,16 @@ bool vtkSlicervolume_mathLogic::ExecuteOperation(
 
 	vtkNew<vtkImageData> outImage;
 	outImage->DeepCopy(filter->GetOutputDataObject(0));
+
+	std::cout << "ScalarType: "
+		<< outImage->GetScalarTypeAsString()
+		<< std::endl;
+
+	double range[2];
+	outImage->GetScalarRange(range);
+	std::cout << "Range: "
+		<< range[0] << " - "
+		<< range[1] << std::endl;
 
 	out->SetAndObserveImageData(outImage);
 	out->CopyOrientation(a);

@@ -109,6 +109,7 @@ void qSlicervolume_mathModuleWidgetPrivate::init()
 	this->operationComboBox->addItem("Add", OP_ADD);
 	this->operationComboBox->addItem("Subtract", OP_SUB);
 	this->operationComboBox->addItem("Multiply", OP_MUL);
+	this->operationComboBox->addItem("Divide", OP_DIV);
 	this->operationComboBox->addItem("Min", OP_MIN);
 	this->operationComboBox->addItem("Max", OP_MAX);
 	this->operationComboBox->addItem("Square", OP_SQR);
@@ -177,6 +178,13 @@ void qSlicervolume_mathModuleWidget::onApply()
 	auto* a = vtkMRMLScalarVolumeNode::SafeDownCast(d->inputAVolumeNodeSelector->currentNode());
 	auto* b = vtkMRMLScalarVolumeNode::SafeDownCast(d->inputBVolumeNodeSelector->currentNode());
 	auto* out = vtkMRMLScalarVolumeNode::SafeDownCast(d->outputVolumeNodeSelector->currentNode());
+
+	if (!a || !out) {
+		QMessageBox::warning(this, "Missing input",
+			"Please select Input A and Output volume.");
+		return;
+	}
+
 	int opIndex = d->operationComboBox->currentIndex();
 	VolumeOp op = static_cast<VolumeOp>(d->operationComboBox->itemData(opIndex).toInt());
 
