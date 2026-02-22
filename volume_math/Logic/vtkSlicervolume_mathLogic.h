@@ -40,6 +40,7 @@
 #include <vtkNew.h>
 #include <vtkSmartPointer.h>
 
+
 enum VolumeOp {
 	OP_MATH_START = 100,
 	OP_ADD, OP_SUB, OP_MUL, OP_DIV, OP_MIN, OP_MAX, OP_ABS, OP_SQR, OP_SQRT,

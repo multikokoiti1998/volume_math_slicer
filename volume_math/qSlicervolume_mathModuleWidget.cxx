@@ -26,8 +26,8 @@
 // Slicer includes
 #include "qSlicervolume_mathModuleWidget.h"
 #include "ui_qSlicervolume_mathModuleWidget.h"
-
 #include "vtkSlicervolume_mathLogic.h"
+
 
 
 //-----------------------------------------------------------------------------
