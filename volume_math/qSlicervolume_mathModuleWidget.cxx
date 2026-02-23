@@ -96,13 +96,27 @@ void qSlicervolume_mathModuleWidgetPrivate::init()
 	this->inputBVolumeNodeSelector->setMRMLScene(q->mrmlScene());
 	this->outputVolumeNodeSelector->setMRMLScene(q->mrmlScene());
 
-	this->applyButton->setEnabled(false);
+	this->input1VolumeNodeSelector->setNodeTypes(QStringList() << "vtkMRMLScalarVolumeNode");
+	this->input2VolumeNodeSelector->setNodeTypes(QStringList() << "vtkMRMLScalarVolumeNode");
+	this->input1VolumeNodeSelector->setMRMLScene(q->mrmlScene());
+	this->input2VolumeNodeSelector->setMRMLScene(q->mrmlScene());
+
+
+	this->ValitationComboBox->setEnabled(true);
+
+	QObject::connect(this->validateButton, SIGNAL(clicked()),
+		q, SLOT(onValidate()));
 
 	QObject::connect(this->inputAVolumeNodeSelector, SIGNAL(currentNodeChanged(vtkMRMLNode*)),
 		q, SLOT(onInputChanged()));
 	QObject::connect(this->inputBVolumeNodeSelector, SIGNAL(currentNodeChanged(vtkMRMLNode*)),
 		q, SLOT(onInputChanged()));
 	QObject::connect(this->outputVolumeNodeSelector, SIGNAL(currentNodeChanged(vtkMRMLNode*)),
+		q, SLOT(onInputChanged()));
+
+	QObject::connect(this->input1VolumeNodeSelector, SIGNAL(currentNodeChanged(vtkMRMLNode*)),
+		q, SLOT(onInputChanged()));
+	QObject::connect(this->input2VolumeNodeSelector, SIGNAL(currentNodeChanged(vtkMRMLNode*)),
 		q, SLOT(onInputChanged()));
 
 	// 演算リストの追加 
@@ -120,9 +134,17 @@ void qSlicervolume_mathModuleWidgetPrivate::init()
 	this->operationComboBox->addItem("Logical AND", OP_AND);
 	this->operationComboBox->addItem("Logical OR", OP_OR);
 	this->operationComboBox->addItem("Logical NOT", OP_NOT);
+	this->operationComboBox->addItem("Logical XOR", OP_XOR);
+
+	//評価リスト
+	this->ValitationComboBox->addItem("MSE", OP_MSE);
+	this->ValitationComboBox->addItem("NCC", OP_NCC);
 	
 	QObject::connect(this->applyButton, SIGNAL(clicked()),
 		q, SLOT(onApply()));
+
+	QObject::connect(this->validateButton, SIGNAL(clicked()),
+		q, SLOT(onValidate()));
 }
 
 void qSlicervolume_mathModuleWidgetPrivate::updateApplyState()
@@ -161,6 +183,12 @@ void qSlicervolume_mathModuleWidget::setMRMLScene(vtkMRMLScene* scene)
 	d->inputAVolumeNodeSelector->setMRMLScene(scene);
 	d->inputBVolumeNodeSelector->setMRMLScene(scene);
 	d->outputVolumeNodeSelector->setMRMLScene(scene);
+
+	d->input1VolumeNodeSelector->setMRMLScene(scene);
+	d->input2VolumeNodeSelector->setMRMLScene(scene);
+
+	
+	d->MRMLTreeView->setMRMLScene(scene);
 
 	d->updateApplyState();
 }
@@ -203,4 +231,38 @@ void qSlicervolume_mathModuleWidget::onApply()
 		}
 	}
 
+}
+
+void qSlicervolume_mathModuleWidget::onValidate()
+{
+	Q_D(qSlicervolume_mathModuleWidget);
+
+	auto* a = vtkMRMLScalarVolumeNode::SafeDownCast(d->input1VolumeNodeSelector->currentNode());
+	auto* b = vtkMRMLScalarVolumeNode::SafeDownCast(d->input2VolumeNodeSelector->currentNode());
+
+	if (!a || !b) {
+		QMessageBox::warning(this, "Missing input", "Please select Input1 and Input2 volumes.");
+		return;
+	}
+
+	int idx = d->ValitationComboBox->currentIndex();
+	VolumeOp metric = static_cast<VolumeOp>(d->ValitationComboBox->itemData(idx).toInt());
+
+	auto* logic = vtkSlicervolume_mathLogic::SafeDownCast(this->logic());
+	if (!logic) return;
+
+	QApplication::setOverrideCursor(Qt::WaitCursor);
+
+	double value = 0.0;
+	bool ok = logic->ComputeMetric(a, b, metric, value);  
+
+	QApplication::restoreOverrideCursor();
+
+	if (!ok) {
+		QMessageBox::critical(this, "Error", "Metric computation failed. Please check dimensions/types.");
+		return;
+	}
+
+	// 結果表示（QLabelやQLineEditに出す）
+	d->validationResultLabel->setText(QString::number(value, 'g', 12));
 }

@@ -26,12 +26,9 @@
 #include <vtkNew.h>
 #include <vtkObjectFactory.h>
 #include <vtkImageThreshold.h>
-
-// ITK includes
-#include <itkImage.h>
-#include <itkVTKImageToImageFilter.h>
-#include <itkImageRegionConstIterator.h>
-#include <cmath>
+#include <vtkImageMathematics.h>
+#include <vtkImageCast.h>
+#include <iostream>
 
 // STD includes
 #include <cassert>
@@ -53,68 +50,6 @@ vtkSlicervolume_mathLogic::~vtkSlicervolume_mathLogic()
 void vtkSlicervolume_mathLogic::PrintSelf(ostream& os, vtkIndent indent)
 {
 	this->Superclass::PrintSelf(os, indent);
-}
-
-// ITK•ÏŠ·—p
-using ImageType = itk::Image<float, 3>;
-
-static ImageType::Pointer VtkToItkFloat(vtkImageData* vtkImg)
-{
-	using ConnectorType = itk::VTKImageToImageFilter<ImageType>;
-	auto connector = ConnectorType::New();
-	connector->SetInput(vtkImg);
-	connector->Update();
-	return connector->GetOutput();
-}
-
-struct SimilarityResult {
-	double mse;
-	double ncc;   // Pearson correlation
-};
-
-static SimilarityResult ComputeMSEandNCC(ImageType* A, ImageType* B)
-{
-	SimilarityResult r{ 0.0, 0.0 };
-
-	itk::ImageRegionConstIterator<ImageType> itA(A, A->GetLargestPossibleRegion());
-	itk::ImageRegionConstIterator<ImageType> itB(B, B->GetLargestPossibleRegion());
-
-	double sumA = 0.0, sumB = 0.0;
-	double sumAA = 0.0, sumBB = 0.0, sumAB = 0.0;
-	double sumSqDiff = 0.0;
-	long long N = 0;
-
-	for (itA.GoToBegin(), itB.GoToBegin(); !itA.IsAtEnd(); ++itA, ++itB) {
-		const double a = static_cast<double>(itA.Get());
-		const double b = static_cast<double>(itB.Get());
-		const double d = a - b;
-
-		sumSqDiff += d * d;
-
-		sumA += a; sumB += b;
-		sumAA += a * a;
-		sumBB += b * b;
-		sumAB += a * b;
-
-		++N;
-	}
-
-	if (N == 0) return r;
-
-	r.mse = sumSqDiff / static_cast<double>(N);
-
-	// Pearson correlationiNCCj
-	// cov = E[ab] - E[a]E[b]
-	const double meanA = sumA / N;
-	const double meanB = sumB / N;
-	const double cov = (sumAB / N) - meanA * meanB;
-	const double varA = (sumAA / N) - meanA * meanA;
-	const double varB = (sumBB / N) - meanB * meanB;
-
-	const double denom = std::sqrt(varA * varB);
-	r.ncc = (denom > 0.0) ? (cov / denom) : 0.0;
-
-	return r;
 }
 
 //---------------------------------------------------------------------------
@@ -277,4 +212,15 @@ bool vtkSlicervolume_mathLogic::ExecuteOperation(
 	out->Modified();
 
 	return true;
+}
+
+bool vtkSlicervolume_mathLogic::ComputeMetric(
+	vtkMRMLScalarVolumeNode* a,
+	vtkMRMLScalarVolumeNode* b,
+	VolumeOp metric,
+	double& outValue)
+{
+	(void)a; (void)b; (void)metric;
+	outValue = 0.0;
+	return true; 
 }

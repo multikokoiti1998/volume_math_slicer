@@ -39,6 +39,7 @@ public:
 public slots:
 	void onInputChanged();
 	void onApply();
+	void onValidate();
 
 protected:
 	QScopedPointer<qSlicervolume_mathModuleWidgetPrivate> d_ptr;

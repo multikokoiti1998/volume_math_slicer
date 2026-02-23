@@ -48,6 +48,11 @@ enum VolumeOp {
 	OP_AND, OP_OR, OP_XOR, OP_NOT
 };
 
+enum ValidationOp {
+	OP_MSE = 1,
+	OP_NCC = 2
+};
+
 class VTK_SLICER_VOLUME_MATH_MODULE_LOGIC_EXPORT vtkSlicervolume_mathLogic :
 	public vtkSlicerModuleLogic
 {
@@ -67,6 +72,12 @@ public:
 		vtkMRMLScalarVolumeNode* out,
 		VolumeOp op,
 		vtkMRMLScalarVolumeNode* b = nullptr);
+
+	bool ComputeMetric(
+		vtkMRMLScalarVolumeNode* a,
+		vtkMRMLScalarVolumeNode* b,
+		VolumeOp metric,
+		double& outValue);
 
 protected:
 	vtkSlicervolume_mathLogic();
