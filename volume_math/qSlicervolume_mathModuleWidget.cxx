@@ -173,7 +173,7 @@ void qSlicervolume_mathModuleWidget::setMRMLScene(vtkMRMLScene* scene)
 	Q_D(qSlicervolume_mathModuleWidget);
 	if (!d->inputAVolumeNodeSelector)
 		return;
-
+	//volume
 	d->inputAVolumeNodeSelector->setNodeTypes(
 		QStringList() << "vtkMRMLScalarVolumeNode");
 	d->inputBVolumeNodeSelector->setNodeTypes(
@@ -183,11 +183,16 @@ void qSlicervolume_mathModuleWidget::setMRMLScene(vtkMRMLScene* scene)
 	d->inputAVolumeNodeSelector->setMRMLScene(scene);
 	d->inputBVolumeNodeSelector->setMRMLScene(scene);
 	d->outputVolumeNodeSelector->setMRMLScene(scene);
-
+	//metrics
+	d->input1VolumeNodeSelector->setNodeTypes(
+		QStringList() << "vtkMRMLScalarVolumeNode");
+	d->input2VolumeNodeSelector->setNodeTypes(
+		QStringList() << "vtkMRMLScalarVolumeNode");
+	d->MRMLTreeView->setNodeTypes(
+		QStringList() << "vtkMRMLScalarVolumeNode");
 	d->input1VolumeNodeSelector->setMRMLScene(scene);
 	d->input2VolumeNodeSelector->setMRMLScene(scene);
-
-	
+	d->MRMLTreeView->model()->setHeaderData(0, Qt::Horizontal, "Current_Load_Volume");
 	d->MRMLTreeView->setMRMLScene(scene);
 
 	d->updateApplyState();
@@ -263,6 +268,6 @@ void qSlicervolume_mathModuleWidget::onValidate()
 		return;
 	}
 
-	// 結果表示（QLabelやQLineEditに出す）
+	// 結果表示
 	d->validationResultLabel->setText(QString::number(value, 'g', 12));
 }

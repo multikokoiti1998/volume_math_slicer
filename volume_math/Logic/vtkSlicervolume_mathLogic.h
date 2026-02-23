@@ -79,20 +79,21 @@ public:
 		VolumeOp metric,
 		double& outValue);
 
+	vtkSmartPointer<vtkImageData> CastToFloat(vtkImageData* input);
+
 protected:
 	vtkSlicervolume_mathLogic();
 	~vtkSlicervolume_mathLogic() override;
 
 	void SetMRMLSceneInternal(vtkMRMLScene* newScene) override;
-	/// Register MRML Node classes to Scene. Gets called automatically when the MRMLScene is attached to this logic class.
 	void RegisterNodes() override;
 	void UpdateFromMRMLScene() override;
 	void OnMRMLSceneNodeAdded(vtkMRMLNode* node) override;
 	void OnMRMLSceneNodeRemoved(vtkMRMLNode* node) override;
 private:
 
-	vtkSlicervolume_mathLogic(const vtkSlicervolume_mathLogic&); // Not implemented
-	void operator=(const vtkSlicervolume_mathLogic&); // Not implemented
+	vtkSlicervolume_mathLogic(const vtkSlicervolume_mathLogic&); 
+	void operator=(const vtkSlicervolume_mathLogic&); 
 };
 
 #endif

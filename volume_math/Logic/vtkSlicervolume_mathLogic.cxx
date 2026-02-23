@@ -1,4 +1,4 @@
-/*==============================================================================
+﻿/*==============================================================================
 
   Program: 3D Slicer
 
@@ -30,6 +30,13 @@
 #include <vtkImageCast.h>
 #include <iostream>
 
+// ITK
+#include <itkImage.h>
+#include <itkVTKImageToImageFilter.h>
+#include <itkIdentityTransform.h>
+#include <itkMeanSquaresImageToImageMetricv4.h>
+#include <itkCorrelationImageToImageMetricv4.h>
+#include <itkLinearInterpolateImageFunction.h>
 // STD includes
 #include <cassert>
 
@@ -86,6 +93,29 @@ void vtkSlicervolume_mathLogic
 {
 }
 
+
+vtkSmartPointer<vtkImageData> vtkSlicervolume_mathLogic::CastToFloat(vtkImageData* input)
+{
+	if (!input) return nullptr;
+
+	if (input->GetScalarType() == VTK_FLOAT)
+	{
+		return input; 
+	}
+
+	vtkNew<vtkImageCast> cast;
+	cast->SetInputData(input);
+	cast->SetOutputScalarTypeToFloat();
+	cast->ClampOverflowOn();
+	cast->Update();
+
+	vtkSmartPointer<vtkImageData> output =
+		vtkSmartPointer<vtkImageData>::New();
+	output->DeepCopy(cast->GetOutput());
+
+	return output;
+}
+
 bool vtkSlicervolume_mathLogic::ExecuteOperation(
 	vtkMRMLScalarVolumeNode* a,
 	vtkMRMLScalarVolumeNode* out,
@@ -126,12 +156,10 @@ bool vtkSlicervolume_mathLogic::ExecuteOperation(
 		filter = logic;
 	}
 
-	else if (op < OP_LOGIC_START)
+	else 
 	{
-		vtkNew<vtkImageMathematics> math;
-
-		vtkSmartPointer<vtkImageData> in1;
-		vtkSmartPointer<vtkImageData> in2;
+		vtkSmartPointer<vtkImageData> in1 = CastToFloat(imgA);
+		vtkSmartPointer<vtkImageData> in2 = imgB ? CastToFloat(imgB) : nullptr;
 
 		if (op == OP_SQRT) {
 			vtkNew<vtkImageThreshold> clamp;
@@ -142,30 +170,7 @@ bool vtkSlicervolume_mathLogic::ExecuteOperation(
 			clamp->Update();
 			in1 = clamp->GetOutput();
 		}
-		else {
-			in1 = imgA;
-		}
-
-		in2 = imgB;
-
-		if (op == OP_DIV) {
-			vtkNew<vtkImageCast> castA;
-			castA->SetInputData(in1);
-			castA->SetOutputScalarTypeToFloat();
-			castA->ClampOverflowOn();
-			castA->Update();
-			in1 = castA->GetOutput();
-
-			if (in2) {
-				vtkNew<vtkImageCast> castB;
-				castB->SetInputData(in2);
-				castB->SetOutputScalarTypeToFloat();
-				castB->ClampOverflowOn();
-				castB->Update();
-				in2 = castB->GetOutput();
-			}
-		}
-
+		vtkNew<vtkImageMathematics> math;
 		math->SetInput1Data(in1);
 		if (in2) math->SetInput2Data(in2);
 
@@ -184,10 +189,7 @@ bool vtkSlicervolume_mathLogic::ExecuteOperation(
 
 		filter = math;
 	}
-	else
-	{
-		std::cout << "Unsupported operation." << std::endl;
-	}
+
 
 	if (!filter) return false;
 	filter->Update();
@@ -220,7 +222,71 @@ bool vtkSlicervolume_mathLogic::ComputeMetric(
 	VolumeOp metric,
 	double& outValue)
 {
-	(void)a; (void)b; (void)metric;
 	outValue = 0.0;
-	return true; 
+	if (!a || !b) return false;
+
+	vtkImageData* aVtk0 = a->GetImageData();
+	vtkImageData* bVtk0 = b->GetImageData();
+	if (!aVtk0 || !bVtk0) return false;
+
+	int da[3], db[3];
+	aVtk0->GetDimensions(da);
+	bVtk0->GetDimensions(db);
+	if (da[0] != db[0] || da[1] != db[1] || da[2] != db[2]) return false;
+
+	vtkSmartPointer<vtkImageData> aVtk = CastToFloat(aVtk0);
+	vtkSmartPointer<vtkImageData> bVtk = CastToFloat(bVtk0);
+	if (!aVtk || !bVtk) return false;
+
+	constexpr unsigned int Dim = 3;
+	using PixelType = float;
+	using ImageType = itk::Image<PixelType, Dim>;
+	using V2I = itk::VTKImageToImageFilter<ImageType>;
+
+	auto convA = V2I::New();
+	auto convB = V2I::New();
+	convA->SetInput(aVtk);
+	convB->SetInput(bVtk);
+	convA->Update();
+	convB->Update();
+
+	ImageType::Pointer fixed = convA->GetOutput();
+	ImageType::Pointer moving = convB->GetOutput();
+	if (!fixed || !moving) return false;
+
+	using TransformType = itk::IdentityTransform<double, Dim>;
+	auto transform = TransformType::New();
+	transform->SetIdentity();
+
+	try {
+		if (metric == OP_MSE) {
+			using MetricType = itk::MeanSquaresImageToImageMetricv4<ImageType, ImageType>;
+			auto m = MetricType::New();
+			m->SetFixedImage(fixed);
+			m->SetMovingImage(moving);
+			m->SetFixedTransform(transform);
+			m->SetMovingTransform(transform);
+			m->Initialize();
+			outValue = static_cast<double>(m->GetValue());
+			return true;
+		}
+
+		if (metric == OP_NCC) {
+			using MetricType = itk::CorrelationImageToImageMetricv4<ImageType, ImageType>;
+			auto m = MetricType::New();
+			m->SetFixedImage(fixed);
+			m->SetMovingImage(moving);
+			m->SetFixedTransform(transform);
+			m->SetMovingTransform(transform);
+			m->Initialize();
+			outValue = static_cast<double>(m->GetValue());
+			return true;
+		}
+	}
+	catch (const itk::ExceptionObject& e) {
+		vtkErrorMacro(<< "ITK metric failed: " << e.what());
+		return false;
+	}
+
+	return false;
 }
