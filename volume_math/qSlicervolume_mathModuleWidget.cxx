@@ -70,17 +70,19 @@ qSlicervolume_mathModuleWidget::~qSlicervolume_mathModuleWidget()
 }
 
 //-----------------------------------------------------------------------------
+//画面を作成して初期化
 void qSlicervolume_mathModuleWidget::setup()
 {
 	Q_D(qSlicervolume_mathModuleWidget);
 	d->setupUi(this);
 	this->Superclass::setup();
-
 	d->init();
 }
 
+//初期化（UIの設定とシグナルとスロットの接続）
 void qSlicervolume_mathModuleWidgetPrivate::init()
 {
+	//publicクラスへのポインタを取得
 	Q_Q(qSlicervolume_mathModuleWidget);
 
 	this->outputVolumeNodeSelector->setNodeTypes(
@@ -91,33 +93,15 @@ void qSlicervolume_mathModuleWidgetPrivate::init()
 	this->outputVolumeNodeSelector->setRenameEnabled(true);
 	this->outputVolumeNodeSelector->setRemoveEnabled(false);
 
-	// MRML scene を NodeSelector に渡す
+	// MRML scene を NodeSelector に渡す（publicクラスからシーンに登録されたノードを取得する)
 	this->inputAVolumeNodeSelector->setMRMLScene(q->mrmlScene());
 	this->inputBVolumeNodeSelector->setMRMLScene(q->mrmlScene());
 	this->outputVolumeNodeSelector->setMRMLScene(q->mrmlScene());
-
 	this->input1VolumeNodeSelector->setNodeTypes(QStringList() << "vtkMRMLScalarVolumeNode");
 	this->input2VolumeNodeSelector->setNodeTypes(QStringList() << "vtkMRMLScalarVolumeNode");
 	this->input1VolumeNodeSelector->setMRMLScene(q->mrmlScene());
 	this->input2VolumeNodeSelector->setMRMLScene(q->mrmlScene());
-
-
 	this->ValitationComboBox->setEnabled(true);
-
-	QObject::connect(this->validateButton, SIGNAL(clicked()),
-		q, SLOT(onValidate()));
-
-	QObject::connect(this->inputAVolumeNodeSelector, SIGNAL(currentNodeChanged(vtkMRMLNode*)),
-		q, SLOT(onInputChanged()));
-	QObject::connect(this->inputBVolumeNodeSelector, SIGNAL(currentNodeChanged(vtkMRMLNode*)),
-		q, SLOT(onInputChanged()));
-	QObject::connect(this->outputVolumeNodeSelector, SIGNAL(currentNodeChanged(vtkMRMLNode*)),
-		q, SLOT(onInputChanged()));
-
-	QObject::connect(this->input1VolumeNodeSelector, SIGNAL(currentNodeChanged(vtkMRMLNode*)),
-		q, SLOT(onInputChanged()));
-	QObject::connect(this->input2VolumeNodeSelector, SIGNAL(currentNodeChanged(vtkMRMLNode*)),
-		q, SLOT(onInputChanged()));
 
 	// 演算リストの追加 
 	this->operationComboBox->addItem("Add", OP_ADD);
@@ -138,11 +122,26 @@ void qSlicervolume_mathModuleWidgetPrivate::init()
 
 	//評価リスト
 	this->ValitationComboBox->addItem("MSE", OP_MSE);
+	this->ValitationComboBox->addItem("MSE", OP_MSE);
 	this->ValitationComboBox->addItem("NCC", OP_NCC);
-	
+
+	//シグナルとスロットの接続
+	//演算用
+	QObject::connect(this->inputAVolumeNodeSelector, SIGNAL(currentNodeChanged(vtkMRMLNode*)),
+		q, SLOT(onInputChanged()));
+	QObject::connect(this->inputBVolumeNodeSelector, SIGNAL(currentNodeChanged(vtkMRMLNode*)),
+		q, SLOT(onInputChanged()));
+	QObject::connect(this->outputVolumeNodeSelector, SIGNAL(currentNodeChanged(vtkMRMLNode*)),
+		q, SLOT(onInputChanged()));
+	QObject::connect(this->operationComboBox, SIGNAL(currentIndexChanged(int)),
+		q, SLOT(onInputChanged()));
 	QObject::connect(this->applyButton, SIGNAL(clicked()),
 		q, SLOT(onApply()));
-
+	//評価用
+	QObject::connect(this->input1VolumeNodeSelector, SIGNAL(currentNodeChanged(vtkMRMLNode*)),
+		q, SLOT(onInputChanged()));
+	QObject::connect(this->input2VolumeNodeSelector, SIGNAL(currentNodeChanged(vtkMRMLNode*)),
+		q, SLOT(onInputChanged()));
 	QObject::connect(this->validateButton, SIGNAL(clicked()),
 		q, SLOT(onValidate()));
 }
@@ -259,7 +258,7 @@ void qSlicervolume_mathModuleWidget::onValidate()
 	QApplication::setOverrideCursor(Qt::WaitCursor);
 
 	double value = 0.0;
-	bool ok = logic->ComputeMetric(a, b, metric, value);  
+	bool ok = logic->ComputeMetric(a, b, metric, value);
 
 	QApplication::restoreOverrideCursor();
 
