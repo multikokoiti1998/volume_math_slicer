@@ -40,34 +40,60 @@
 #include <vtkNew.h>
 #include <vtkSmartPointer.h>
 
+
+enum VolumeOp {
+	OP_MATH_START = 100,
+	OP_ADD, OP_SUB, OP_MUL, OP_DIV, OP_MIN, OP_MAX, OP_ABS, OP_SQR, OP_SQRT,
+	OP_LOGIC_START = 200,
+	OP_AND, OP_OR, OP_XOR, OP_NOT
+};
+
+enum ValidationOp {
+	OP_MSE = 1,
+	OP_NCC = 2
+};
+
 class VTK_SLICER_VOLUME_MATH_MODULE_LOGIC_EXPORT vtkSlicervolume_mathLogic :
-  public vtkSlicerModuleLogic
+	public vtkSlicerModuleLogic
 {
 public:
 
-  static vtkSlicervolume_mathLogic *New();
-  vtkTypeMacro(vtkSlicervolume_mathLogic, vtkSlicerModuleLogic);
-  void PrintSelf(ostream& os, vtkIndent indent) override;
+	static vtkSlicervolume_mathLogic* New();
 
-  void AddVolumes(vtkMRMLScalarVolumeNode* inputA,
-      vtkMRMLScalarVolumeNode* inputB,
-      vtkMRMLScalarVolumeNode* output);
 
+
+	vtkTypeMacro(vtkSlicervolume_mathLogic, vtkSlicerModuleLogic);
+
+	void PrintSelf(ostream& os, vtkIndent indent) override;
+
+	// ã§í èàóùä÷êî
+	bool ExecuteOperation(
+		vtkMRMLScalarVolumeNode* a,
+		vtkMRMLScalarVolumeNode* out,
+		VolumeOp op,
+		vtkMRMLScalarVolumeNode* b = nullptr);
+
+	bool ComputeMetric(
+		vtkMRMLScalarVolumeNode* a,
+		vtkMRMLScalarVolumeNode* b,
+		VolumeOp metric,
+		double& outValue);
+
+	vtkSmartPointer<vtkImageData> CastToFloat(vtkImageData* input);
 
 protected:
-  vtkSlicervolume_mathLogic();
-  ~vtkSlicervolume_mathLogic() override;
+	vtkSlicervolume_mathLogic();
+	~vtkSlicervolume_mathLogic() override;
 
-  void SetMRMLSceneInternal(vtkMRMLScene* newScene) override;
-  /// Register MRML Node classes to Scene. Gets called automatically when the MRMLScene is attached to this logic class.
-  void RegisterNodes() override;
-  void UpdateFromMRMLScene() override;
-  void OnMRMLSceneNodeAdded(vtkMRMLNode* node) override;
-  void OnMRMLSceneNodeRemoved(vtkMRMLNode* node) override;
+	void SetMRMLSceneInternal(vtkMRMLScene* newScene) override;
+	void RegisterNodes() override;
+	void UpdateFromMRMLScene() override;
+	void OnMRMLSceneNodeAdded(vtkMRMLNode* node) override;
+	void OnMRMLSceneNodeRemoved(vtkMRMLNode* node) override;
 private:
 
-  vtkSlicervolume_mathLogic(const vtkSlicervolume_mathLogic&); // Not implemented
-  void operator=(const vtkSlicervolume_mathLogic&); // Not implemented
+	vtkSlicervolume_mathLogic(const vtkSlicervolume_mathLogic&); 
+	void operator=(const vtkSlicervolume_mathLogic&); 
 };
 
 #endif
