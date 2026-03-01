@@ -122,7 +122,6 @@ void qSlicervolume_mathModuleWidgetPrivate::init()
 
 	//評価リスト
 	this->ValitationComboBox->addItem("MSE", OP_MSE);
-	this->ValitationComboBox->addItem("MSE", OP_MSE);
 	this->ValitationComboBox->addItem("NCC", OP_NCC);
 
 	//シグナルとスロットの接続
@@ -157,7 +156,7 @@ void qSlicervolume_mathModuleWidgetPrivate::updateApplyState()
 	bool hasB = this->inputBVolumeNodeSelector->currentNode() != nullptr;
 	bool hasOut = this->outputVolumeNodeSelector->currentNode() != nullptr;
 
-	bool isUnaryOperation = (op == OP_SQR || op == OP_SQRT || op == OP_NOT || op == OP_ABS);
+	bool isUnaryOperation = (op == OP_SQR || op == OP_SQRT || op == OP_ABS);
 
 	bool canApply = hasA && hasOut && (isUnaryOperation || hasB);
 	this->applyButton->setEnabled(canApply);
@@ -208,7 +207,7 @@ void qSlicervolume_mathModuleWidget::onApply()
 	Q_D(qSlicervolume_mathModuleWidget);
 
 	auto* a = vtkMRMLScalarVolumeNode::SafeDownCast(d->inputAVolumeNodeSelector->currentNode());
-	auto* b = vtkMRMLScalarVolumeNode::SafeDownCast(d->inputBVolumeNodeSelector->currentNode());
+	auto* b0 = vtkMRMLScalarVolumeNode::SafeDownCast(d->inputBVolumeNodeSelector->currentNode());
 	auto* out = vtkMRMLScalarVolumeNode::SafeDownCast(d->outputVolumeNodeSelector->currentNode());
 
 	if (!a || !out) {
@@ -219,6 +218,10 @@ void qSlicervolume_mathModuleWidget::onApply()
 
 	int opIndex = d->operationComboBox->currentIndex();
 	VolumeOp op = static_cast<VolumeOp>(d->operationComboBox->itemData(opIndex).toInt());
+
+	//単項演算子ならbをnullにする
+	const bool isUnary = (op == OP_SQR || op == OP_SQRT || op == OP_ABS || op == OP_NOT); 
+	auto* b = isUnary ? nullptr : b0;
 
 	auto* logic = vtkSlicervolume_mathLogic::SafeDownCast(this->logic());
 	if (logic)
