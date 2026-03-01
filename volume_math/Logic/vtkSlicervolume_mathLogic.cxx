@@ -29,6 +29,7 @@
 #include <vtkImageMathematics.h>
 #include <vtkImageCast.h>
 #include <iostream>
+#include <vtkPointData.h>
 
 // ITK
 #include <itkImage.h>
@@ -97,7 +98,7 @@ void vtkSlicervolume_mathLogic
 vtkSmartPointer<vtkImageData> vtkSlicervolume_mathLogic::CastToFloat(vtkImageData* input)
 {
 	if (!input) return nullptr;
-
+//todo
 	if (input->GetScalarType() == VTK_FLOAT)
 	{
 		return input; 
@@ -161,9 +162,18 @@ bool vtkSlicervolume_mathLogic::ExecuteOperation(
 		vtkSmartPointer<vtkImageData> in1 = CastToFloat(imgA);
 		vtkSmartPointer<vtkImageData> in2 = imgB ? CastToFloat(imgB) : nullptr;
 
+		vtkDataArray* s = in1->GetPointData()->GetScalars();
+		vtkIdType n = s->GetNumberOfTuples() * s->GetNumberOfComponents();
+		vtkIdType bad = 0;
+		for (vtkIdType i = 0; i < n; i++) {
+			double v = s->GetComponent(i, 0);
+			if (!std::isfinite(v)) { bad++; if (bad < 10) std::cout << "bad v=" << v << "\n"; }
+		}
+		std::cout << "bad count=" << bad << "\n";
+
 		if (op == OP_SQRT) {
 			vtkNew<vtkImageThreshold> clamp;
-			clamp->SetInputData(imgA);
+			clamp->SetInputData(in1);
 			clamp->ThresholdByLower(0.0);
 			clamp->SetInValue(0.0);
 			clamp->ReplaceOutOff();
