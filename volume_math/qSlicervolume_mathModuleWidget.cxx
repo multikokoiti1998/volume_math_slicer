@@ -220,7 +220,7 @@ void qSlicervolume_mathModuleWidget::onApply()
 	VolumeOp op = static_cast<VolumeOp>(d->operationComboBox->itemData(opIndex).toInt());
 
 	//単項演算子ならbをnullにする
-	const bool isUnary = (op == OP_SQR || op == OP_SQRT || op == OP_ABS || op == OP_NOT); 
+	const bool isUnary = (op == OP_SQR || op == OP_SQRT || op == OP_ABS); 
 	auto* b = isUnary ? nullptr : b0;
 
 	auto* logic = vtkSlicervolume_mathLogic::SafeDownCast(this->logic());
