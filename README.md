@@ -1,150 +1,103 @@
-#  Volume Math Extension（3D Slicer）
+# VolumeMath — 3D Slicer Extension for Medical Image Arithmetic & Evaluation
 
-## 概要
-本プロジェクトは、3D Slicer上で医用画像に対して演算処理および評価指標計算を行う  
-**カスタム拡張モジュール**です。
-
-従来、ImageJを用いて個別に実施していた画像演算や評価（MSE・NCCなど）を、  
-研究室で使用している3D Slicer環境に統合しました。
-
-複数ツール間で分断されていた処理を一元化することで、
-
-- ワークフローの簡略化
-- 再現性の向上
-- 医用画像解析の効率化
-
-放射線治療や画像比較において必要となる  
-**画像間の差分・類似度評価（MSE / NCC）**を実装しました。
+![Platform](https://img.shields.io/badge/Platform-3D%20Slicer%205.8-blue)
+![Language](https://img.shields.io/badge/Language-C%2B%2B-00599C?logo=cplusplus)
+![UI](https://img.shields.io/badge/UI-Qt-41CD52?logo=qt)
+![Lib](https://img.shields.io/badge/Lib-VTK%20%2F%20ITK-orange)
+![OS](https://img.shields.io/badge/OS-Windows-blue?logo=windows)
 
 ---
 
-##  目的
-- 医用画像の演算処理の効率化
-- 画像間の定量評価の実装
-- 研究用途（線量評価・画像比較）への応用
+## Overview
+
+3D Slicer 上で医用画像の演算処理・定量評価を行うカスタム拡張モジュール。
+
+従来 ImageJ で個別に実施していた画像演算と評価指標計算（MSE・NCC）を 3D Slicer 環境に統合し、放射線治療・画像比較ワークフローを一元化。VTK パイプラインベースの実装により、spacing / origin などのメタデータを維持したまま処理を行う。
 
 ---
 
-##  対応環境
-- 3D Slicer：5.8
-- OS：Windows
+## Tech Stack
+
+| 項目 | 技術 |
+|---|---|
+| 言語 | C++ |
+| UI | Qt |
+| 画像処理 | VTK / ITK |
+| プラットフォーム | 3D Slicer 5.8 API |
+| 対応 OS | Windows |
 
 ---
 
-##  主な機能
+## Features
 
-###  画像演算
-- Add（加算）
-- Subtract（差分）
-- Multiply（乗算）
-- Divide（除算）
-- Min / Max
-- Square（2乗）
-- Square Root（平方根）
-- Absolute（絶対値）
+### 画像演算
 
----
+| 演算 | 内容 |
+|---|---|
+| Add / Subtract | 加算・差分 |
+| Multiply / Divide | 乗算・除算 |
+| Min / Max | 最小・最大値演算 |
+| Square / Square Root | 2乗・平方根 |
+| Absolute | 絶対値 |
 
-###  論理演算
-- AND
-- OR
-- NOT
-- XOR
+### 論理演算
+
+`AND` / `OR` / `NOT` / `XOR`
 
 ---
 
-###  評価指標（重要）
-### MSE（Mean Squared Error）
+### 評価指標
 
-2つの画像の画素値の差の二乗平均を表す指標。
+#### MSE（Mean Squared Error）
 
 $$
-MSE = \frac{1}{N} \sum_{i=1}^{N} (I_1(i) - I_2(i))^2
+MSE = \frac{1}{N} \sum_{i=1}^{N} \left( I_1(i) - I_2(i) \right)^2
 $$
 
-- $I_1, I_2$：比較する画像
-- $N$：画素数
+2画像間の画素値差の二乗平均。線量差・画像レジストレーション精度の定量評価に使用。
 
-
----
-
-### NCC（Normalized Cross-Correlation）
-
-2つの画像の類似度を評価する指標。
+#### NCC（Normalized Cross-Correlation）
 
 $$
 NCC = \frac{\sum_{i=1}^{N} I_1(i) \cdot I_2(i)}
 {\sqrt{\sum_{i=1}^{N} I_1(i)^2} \cdot \sqrt{\sum_{i=1}^{N} I_2(i)^2}}
 $$
 
-- 値の範囲：-1 ～ 1
-- 1に近いほど類似度が高い
+値域：$[-1, 1]$　— 1 に近いほど類似度が高い。輝度変化に対してロバストな類似度評価に有効。
 
 ---
 
-##  実装の工夫
+## Implementation Notes
 
-- VTKパイプラインで処理
-- 出力時にメタデータ（spacing / origin）維持
-- 単一画像 / 複数画像の両方に対応
+- **VTK パイプライン**による処理で spacing / origin などのメタデータを維持
+- 単一画像・2画像入力の両方に対応
+- 出力先：既存ボリュームへの上書き または 新規ボリューム生成
 
----
-
-##  入出力仕様
-
-### 入力
-- DICOMデータ（Slicerから読み込み）
-
-### 出力
-- 既存ボリューム上書き
-- 新規ボリューム生成
-
-※ DICOM出力時はint16に変換されるため、  
-float精度を保つ場合はNRRD形式推奨 
+> **Note:** DICOM 出力時は int16 変換が発生するため、float 精度を保持する場合は **NRRD 形式**を推奨。
 
 ---
 
-## ▶️ 使用方法
+## Usage
 
-### ① インストール
-- Extensionをzipからインストール
-
-### ② データ読み込み
-- DICOM ImportからCTを読み込み
-
-### ③ 演算選択
-- 入力ボリュームを指定
-- 演算を選択
-- 実行
+```
+1. zip から Extension をインストール
+2. DICOM Import から CT ボリュームを読み込み
+3. 入力ボリュームを指定
+4. 演算 / 評価指標を選択して実行
+```
 
 ---
 
-##  想定ユースケース
-- DIR結果の評価
-- 放射線治療における画像比較
-- Gamma解析前処理
+## Screenshot
+
 ![画面](use_imgs.png)
----
-
-##  技術スタック
-- C++
-- Qt（UI）
-- VTK / ITK
-- 3D Slicer API
 
 ---
 
-## ⚠️ 課題
-- UIの改善余地あり
-- 大規模データでの高速化
-- GPU対応未実装
+## Use Cases
 
----
-
-##  今後の展望
-- SSIMなど追加指標の実装
-- GPU対応（CUDA）
-- バッチ処理機能
-- DICOMエクスポート改善
+- DIR（変形画像レジストレーション）結果の定量評価
+- 放射線治療における計画 CT と CBCT の画像比較
+- ガンマ解析の前処理（差分画像生成）
 
 ---
